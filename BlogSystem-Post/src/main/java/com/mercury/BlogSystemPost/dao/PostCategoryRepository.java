@@ -19,4 +19,5 @@ public interface PostCategoryRepository extends JpaRepository<PostCategory, Inte
 
 
 
+
 }

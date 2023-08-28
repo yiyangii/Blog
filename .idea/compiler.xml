@@ -14,11 +14,20 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="BlogSystem-Community" target="1.5" />
-      <module name="BlogSystem-Post" target="1.5" />
-      <module name="BlogSystem-User" target="1.5" />
-      <module name="BlogSystemProject" target="1.5" />
-      <module name="eureka" target="1.5" />
+      <module name="BlogSystem-Community" target="17" />
+      <module name="BlogSystem-Post" target="17" />
+      <module name="BlogSystem-User" target="17" />
+      <module name="BlogSystemProject" target="17" />
+      <module name="eureka" target="17" />
     </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="BlogSystem-Community" options="-parameters" />
+      <module name="BlogSystem-Post" options="-parameters" />
+      <module name="BlogSystem-User" options="-parameters" />
+      <module name="BlogSystemProject" options="-parameters" />
+      <module name="eureka" options="-parameters" />
+    </option>
   </component>
 </project>
