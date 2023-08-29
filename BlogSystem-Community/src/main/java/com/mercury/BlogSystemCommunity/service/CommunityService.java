@@ -5,6 +5,8 @@ import com.mercury.BlogSystemCommunity.bean.BlogUserCommunity;
 import com.mercury.BlogSystemCommunity.config.RabbitMQConfig;
 import com.mercury.BlogSystemCommunity.dao.BlogCommunityRepository;
 import com.mercury.BlogSystemCommunity.dao.BlogUserCommunityRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
@@ -14,6 +16,8 @@ import java.util.Map;
 
 @Service
 public class CommunityService {
+    private static final Logger logger = LoggerFactory.getLogger(CommunityService.class);
+
 
     @Autowired
     private BlogCommunityRepository blogCommunityRepository;
@@ -29,13 +33,15 @@ public class CommunityService {
 
 
         BlogCommunity savedCommunity = blogCommunityRepository.save(blogCommunity);
+        Long generatedId = savedCommunity.getId();
 
 
         Map<String, Object> newCommunityMessage = new HashMap<>();
         newCommunityMessage.put("type", "NEW_COMMUNITY");
-        newCommunityMessage.put("communityId", savedCommunity.getId());
-        newCommunityMessage.put("userId",savedCommunity.getCommunityCreator());
+        newCommunityMessage.put("communityId", (Long)savedCommunity.getId());
+        newCommunityMessage.put("userId",(Long)savedCommunity.getCommunityCreator());
         rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.ROUTING_KEY_NEW_COMMUNITY, newCommunityMessage);
+        logger.info("Sent NEW_COMMUNITY message: {}", newCommunityMessage);
 
         return savedCommunity;
     }
@@ -50,10 +56,42 @@ public class CommunityService {
 
         Map<String, Object> followMessage = new HashMap<>();
         followMessage.put("type", "FOLLOW_COMMUNITY");
-        followMessage.put("userId", userId);
-        followMessage.put("communityId", communityId);
+        followMessage.put("userId", (Long)userId);
+        followMessage.put("communityId", (Long)communityId);
         rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.ROUTING_KEY_FOLLOW_COMMUNITY, followMessage);
+        logger.info("Sent FOLLOW_COMMUNITY message: {}", followMessage);
 
         return "Followed community successfully";
+    }
+
+    public String unfollowCommunity(Long userId, Long communityId) {
+        // 从数据库中删除关注关系
+        blogUserCommunityRepository.deleteByUserIdAndCommunityId(userId, communityId);
+
+        // 发送取消关注的消息
+        Map<String, Object> unfollowMessage = new HashMap<>();
+        unfollowMessage.put("type", "UNFOLLOW_COMMUNITY");
+        unfollowMessage.put("userId", userId);
+        unfollowMessage.put("communityId", communityId);
+
+        rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.ROUTING_KEY_UNFOLLOW_COMMUNITY, unfollowMessage);
+
+        logger.info("Unfollow message sent: {}", unfollowMessage);
+
+        return "Unfollowed community successfully";
+    }
+
+    public String deleteCommunity(Long communityId) {
+        blogCommunityRepository.deleteById(communityId);
+
+        Map<String, Object> deleteMessage = new HashMap<>();
+        deleteMessage.put("type", "DELETE_COMMUNITY");
+        deleteMessage.put("communityId", communityId);
+
+        rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.ROUTING_KEY_DELETE_COMMUNITY, deleteMessage);
+
+        logger.info("Delete community message sent: {}", deleteMessage);
+
+        return "Deleted community successfully";
     }
 }

@@ -1,3 +1,0 @@
-MessageCreationService
-MessageQueryService
-MessageStatusService

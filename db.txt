@@ -308,3 +308,21 @@ select * from post_service.blog_image
     ]
 
 }
+CREATE SEQUENCE community_service.community_id_seq;
+select * from user_service.users;
+
+
+http://localhost:8087/api/community/create
+/* community create */
+{
+  "communityName": "NewCommunity",
+  "communityCreator": 103
+}
+
+http://localhost:8087/api/community/follow
+/* community follow */
+{
+  "communityId": "3",
+  "userId": 106
+}
+

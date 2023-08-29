@@ -9,7 +9,6 @@
         <outputRelativeToContentRoot value="true" />
         <module name="BlogSystem-Post" />
         <module name="BlogSystem-User" />
-        <module name="BlogSystemProject" />
         <module name="BlogSystem-Community" />
         <module name="eureka" />
       </profile>

@@ -13,7 +13,8 @@ import lombok.ToString;
 @Table(schema = "community_service", name = "blog_community")
 public class BlogCommunity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "community_id_seq")
+    @SequenceGenerator(name = "community_id_seq", sequenceName = "community_service.community_id_seq", allocationSize = 1)
     private Long id;
     private String communityName;
     private Long communityCreator;
