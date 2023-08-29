@@ -16,6 +16,6 @@ public class BlogCommunity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String communityName;
-    private Integer communityCreator;
+    private Long communityCreator;
 
 }

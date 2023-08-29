@@ -1,13 +1,12 @@
 package com.mercury.BlogSystemCommunity.service;
 
 import com.mercury.BlogSystemCommunity.bean.BlogCommunity;
-import com.mercury.BlogSystemCommunity.bean.BlogPostCommunity;
 import com.mercury.BlogSystemCommunity.bean.BlogUserCommunity;
+import com.mercury.BlogSystemCommunity.config.RabbitMQConfig;
 import com.mercury.BlogSystemCommunity.dao.BlogCommunityRepository;
-import com.mercury.BlogSystemCommunity.dao.BlogPostCommunityRepository;
 import com.mercury.BlogSystemCommunity.dao.BlogUserCommunityRepository;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -23,54 +22,38 @@ public class CommunityService {
     private BlogUserCommunityRepository blogUserCommunityRepository;
 
     @Autowired
-    private BlogPostCommunityRepository blogPostCommunityRepository;
-
-    @Autowired
     private RabbitTemplate rabbitTemplate;
 
+    // 创建新社群
+    public BlogCommunity createCommunity(BlogCommunity blogCommunity) {
 
 
-    public String followCommunity(Integer userId, Integer communityId) {
-        try {
-            //user follow community and save the relationship
-            BlogUserCommunity userCommunity = new BlogUserCommunity();
-            userCommunity.setUserId(Long.valueOf(userId));
-            userCommunity.setCommunityId(Long.valueOf(communityId));
-            blogUserCommunityRepository.save(userCommunity);
+        BlogCommunity savedCommunity = blogCommunityRepository.save(blogCommunity);
 
-            // 发送消息给社群创建者，通知有新的关注者
-            Map<String, Object> messageToCreator = new HashMap<>();
-            messageToCreator.put("type", "FOLLOW_COMMUNITY");
-            messageToCreator.put("userId", userId);
-            messageToCreator.put("communityId", communityId);
-            rabbitTemplate.convertAndSend("community_exchange", "follow.community", messageToCreator);
 
-            // 发送消息给关注社群的用户，通知关注成功
-            Map<String, Object> messageToUser = new HashMap<>();
-            messageToUser.put("type", "FOLLOW_SUCCESS");
-            messageToUser.put("userId", userId);
-            messageToUser.put("communityId", communityId);
-            rabbitTemplate.convertAndSend("user_exchange", "follow.success", messageToUser);
+        Map<String, Object> newCommunityMessage = new HashMap<>();
+        newCommunityMessage.put("type", "NEW_COMMUNITY");
+        newCommunityMessage.put("communityId", savedCommunity.getId());
+        newCommunityMessage.put("userId",savedCommunity.getCommunityCreator());
+        rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.ROUTING_KEY_NEW_COMMUNITY, newCommunityMessage);
 
-            return "Followed successfully";
-        } catch (Exception e) {
-            return "Error occurred while following: " + e.getMessage();
-        }
+        return savedCommunity;
     }
 
 
-    public void addPostToCommunity(Integer postId, Integer communityId) {
-        // 添加帖子到社群
-        BlogPostCommunity postCommunity = new BlogPostCommunity();
-        postCommunity.setPostId(Long.valueOf(postId));
-        postCommunity.setCommunityId(Long.valueOf(communityId));
-        blogPostCommunityRepository.save(postCommunity);
+    public String followCommunity(Long userId, Long communityId) {
+        BlogUserCommunity userCommunity = new BlogUserCommunity();
+        userCommunity.setUserId(Long.valueOf(userId));
+        userCommunity.setCommunityId(Long.valueOf(communityId));
+        blogUserCommunityRepository.save(userCommunity);
 
-        // 发送消息给用户服务，通知社群有新的帖子
-        Map<String, Object> message = new HashMap<>();
-        message.put("type", "NEW_POST_IN_COMMUNITY");
-        message.put("postId", postId);
-        message.put("communityId", communityId);
-        rabbitTemplate.convertAndSend("your_exchange_name", "your_routing_key", message);
+
+        Map<String, Object> followMessage = new HashMap<>();
+        followMessage.put("type", "FOLLOW_COMMUNITY");
+        followMessage.put("userId", userId);
+        followMessage.put("communityId", communityId);
+        rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.ROUTING_KEY_FOLLOW_COMMUNITY, followMessage);
+
+        return "Followed community successfully";
     }
 }
