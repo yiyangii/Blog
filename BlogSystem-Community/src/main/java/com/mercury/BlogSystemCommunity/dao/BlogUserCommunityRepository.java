@@ -7,4 +7,6 @@ import org.springframework.transaction.annotation.Transactional;
 public interface BlogUserCommunityRepository extends JpaRepository<BlogUserCommunity, Long> {
     @Transactional
     void deleteByUserIdAndCommunityId(Long userId, Long communityId);
+
+    void deleteByCommunityId(Long communityId);
 }

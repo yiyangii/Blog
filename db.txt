@@ -326,3 +326,16 @@ http://localhost:8087/api/community/follow
   "userId": 106
 }
 
+
+/* delete */
+http://localhost:8087/api/community/delete/7
+{
+    "userId": 103
+}
+
+/* http://localhost:8087/api/community/unfollow */
+
+{
+  "communityId": "4",
+  "userId": 106
+}

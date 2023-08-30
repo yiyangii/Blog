@@ -10,9 +10,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class CommunityService {
@@ -81,17 +83,33 @@ public class CommunityService {
         return "Unfollowed community successfully";
     }
 
-    public String deleteCommunity(Long communityId) {
-        blogCommunityRepository.deleteById(communityId);
+    @Transactional
+    public String deleteCommunity(Long communityId, Long userId) {
+        Optional<BlogCommunity> community = blogCommunityRepository.findById(communityId);
 
-        Map<String, Object> deleteMessage = new HashMap<>();
-        deleteMessage.put("type", "DELETE_COMMUNITY");
-        deleteMessage.put("communityId", communityId);
+        if(community.isPresent()) {
+            if(community.get().getCommunityCreator().equals(userId)) {
+                // 删除所有与社群相关的 blog_user_community 记录
+                blogUserCommunityRepository.deleteByCommunityId(communityId);
 
-        rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.ROUTING_KEY_DELETE_COMMUNITY, deleteMessage);
+                // 然后删除社群
+                blogCommunityRepository.deleteById(communityId);
 
-        logger.info("Delete community message sent: {}", deleteMessage);
+                // 发送消息
+                Map<String, Object> deleteMessage = new HashMap<>();
+                deleteMessage.put("type", "DELETE_COMMUNITY");
+                deleteMessage.put("communityId", communityId);
+                rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.ROUTING_KEY_DELETE_COMMUNITY, deleteMessage);
 
-        return "Deleted community successfully";
+                logger.info("Deleted community with ID: {}", communityId);
+                logger.info("Delete community message sent: {}", deleteMessage);
+
+                return "Deleted community successfully";
+            } else {
+                return "You are not authorized to delete this community";
+            }
+        } else {
+            return "Community not found";
+        }
     }
 }

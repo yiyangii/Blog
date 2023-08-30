@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/community")
 public class CommunityController {
@@ -18,7 +20,6 @@ public class CommunityController {
 
     @PostMapping("/create")
     public ResponseEntity<BlogCommunity> createCommunity(@RequestBody BlogCommunity community) {
-        System.out.println(community);
         BlogCommunity newCommunity = communityService.createCommunity(community);
         return new ResponseEntity<>(newCommunity, HttpStatus.CREATED);
     }
@@ -30,16 +31,30 @@ public class CommunityController {
     }
 
     @PostMapping("/unfollow")
-    public ResponseEntity<String> unfollowCommunity(@RequestBody Long userId, @RequestBody Long communityId) {
+    public ResponseEntity<String> unfollowCommunity(@RequestBody Map<String, Long> body) {
+        Long userId = body.get("userId");
+        Long communityId = body.get("communityId");
         String message = communityService.unfollowCommunity(userId, communityId);
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
+
     // 删除社群
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> deleteCommunity(@PathVariable Long id) {
-        communityService.deleteCommunity(id);
-        return new ResponseEntity<>("Community deleted successfully", HttpStatus.OK);
+    @DeleteMapping("/delete/{communityId}")
+    public ResponseEntity<String> deleteCommunity(@PathVariable Long communityId, @RequestBody Map<String, Long> body) {
+        Long userId = body.get("userId");
+        System.out.println(userId);
+        System.out.println(communityId);
+        String message = communityService.deleteCommunity(communityId, userId);
+
+        if ("Deleted community successfully".equals(message)) {
+            return new ResponseEntity<>(message, HttpStatus.OK);
+        } else if ("You are not authorized to delete this community".equals(message) || "Community not found".equals(message)) {
+            return new ResponseEntity<>(message, HttpStatus.FORBIDDEN);
+        } else {
+            return new ResponseEntity<>("Unknown error", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
+
 }
 
