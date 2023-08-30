@@ -15,9 +15,6 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.Date;
 import java.util.*;
-import java.util.stream.Collectors;
-
-
 
 
 @Service
@@ -43,6 +40,7 @@ public class PostService {
     private static final String ROUTING_KEY_POST_CREATED = "blog.post.created";
     private static final String ROUTING_KEY_POST_UPDATED = "blog.post.updated";
     private static final String ROUTING_KEY_POST_DELETED = "blog.post.deleted";
+
 
 
     @Autowired
@@ -104,11 +102,6 @@ public class PostService {
             throw new RuntimeException("Error while saving post", e);
         }
     }
-
-
-
-
-
 
     @Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED)
     public Post updatePost(Post post) {
@@ -208,6 +201,54 @@ public class PostService {
         } catch(Exception e) {
             rabbitTemplate.convertAndSend(EXCHANGE_NAME, ROUTING_KEY_USER_DELETE_FAILED, userId);
             logger.error("Error deleting posts for user ID: " + userId, e);
+        }
+    }
+
+
+    @Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED)
+    public Post savePostToCommunity(Post post,String communityName) {
+        try {
+            Set<PostCategory> postCategories = post.getPostCategories();
+            if (postCategories != null) {
+                postCategories.forEach(postCategory -> {
+                    Category category = categoryRepository.findById(postCategory.getCategory().getId()).orElse(null);
+                    if (category == null) {
+                        throw new RuntimeException("Category not found for id: " + postCategory.getCategory().getId());
+                    }
+                    postCategory.setCategory(category);
+                    postCategory.setPost(post);
+                });
+            }
+            Set<PostTag> postTags = post.getPostTags();
+            if (postTags != null) {
+                postTags.forEach(postTag -> {
+                    Tag tag = tagRepository.findById(postTag.getTag().getId()).orElse(null);
+                    if (tag == null) {
+                        throw new RuntimeException("Tag not found for id: " + postTag.getTag().getId());
+                    }
+                    postTag.setTag(tag);
+                    postTag.setPost(post);
+                });
+            }
+            List<Image> images = post.getImages();
+            if (images != null) {
+                post.getImages().forEach(img -> img.setPost(post));
+            }
+            Post savedPost = postRepository.save(post);
+
+            Map<String, Object> message = new HashMap<>();
+            message.put("postId", post.getId());
+            message.put("communityName",communityName);
+
+
+
+            //rabbitTemplate.convertAndSend(EXCHANGE_NAME, ROUTING_KEY_POST_COMMUNITY, message);
+            logger.info("send to community");
+
+
+            return savedPost;
+        } catch (Exception e) {
+            throw new RuntimeException("Error while saving post", e);
         }
     }
 

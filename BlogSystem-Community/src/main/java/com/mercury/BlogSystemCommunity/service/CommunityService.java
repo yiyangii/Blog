@@ -1,12 +1,15 @@
 package com.mercury.BlogSystemCommunity.service;
 
 import com.mercury.BlogSystemCommunity.bean.BlogCommunity;
+import com.mercury.BlogSystemCommunity.bean.BlogPostCommunity;
 import com.mercury.BlogSystemCommunity.bean.BlogUserCommunity;
 import com.mercury.BlogSystemCommunity.config.RabbitMQConfig;
 import com.mercury.BlogSystemCommunity.dao.BlogCommunityRepository;
+import com.mercury.BlogSystemCommunity.dao.BlogPostCommunityRepository;
 import com.mercury.BlogSystemCommunity.dao.BlogUserCommunityRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
@@ -23,6 +26,9 @@ public class CommunityService {
 
     @Autowired
     private BlogCommunityRepository blogCommunityRepository;
+
+    @Autowired
+    private BlogPostCommunityRepository blogPostCommunityRepository;
 
     @Autowired
     private BlogUserCommunityRepository blogUserCommunityRepository;
@@ -112,4 +118,23 @@ public class CommunityService {
             return "Community not found";
         }
     }
+
+    //@RabbitListener(queues = "post.community.queue")
+    public void handlePostCommunityMessage(Map<String, Object> message) {
+        Long postId = (Long) message.get("postId");
+        String communityName = (String) message.get("communityName");
+
+        // 从communityName获取communityId，这取决于你如何设计你的数据模型和DAO
+        Long communityId = blogCommunityRepository.getCommunityIdBycommunityName(communityName);  // 示例方法，请根据实际情况来实现
+
+        BlogPostCommunity relation = new BlogPostCommunity();
+        relation.setPostId(postId);
+        relation.setCommunityId(communityId);
+
+        blogPostCommunityRepository.save(relation);
+        logger.info("Successfully saved the relation between postId {} and communityId {}", postId, communityId);
+
+    }
+
+
 }

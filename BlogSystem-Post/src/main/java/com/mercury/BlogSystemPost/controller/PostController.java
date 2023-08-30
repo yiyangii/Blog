@@ -63,4 +63,10 @@ public class PostController {
         postService.deletePost(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+    @PostMapping("/community")
+    public Post createPostInCommunity(@RequestBody Post post, @RequestParam String communityName) {
+        return postService.savePostToCommunity(post, communityName);
+    }
+
 }
