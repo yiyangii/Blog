@@ -191,9 +191,29 @@ public class PostService {
     }
 
     public void deletePost(int id) {
-        postRepository.deleteById((long) id);
+        //postRepository.deleteById((long) id);
         rabbitTemplate.convertAndSend(EXCHANGE_NAME, ROUTING_KEY_POST_DELETED, id);
     }
+
+    @Transactional
+    public void actualDeletePost(long id) {
+        postRepository.deleteById(id);
+    }
+
+    @Transactional
+    @RabbitListener(queues = "postDeletedAckQueue")
+    public void handlePostDeleteAck(int id) {
+        try {
+            // 收到确认消息后，执行实际的删除操作
+            actualDeletePost((long) id);
+        } catch (Exception e) {
+            logger.error("Error while deleting post ID: {}", id, e);
+        }
+    }
+
+
+
+
 
     @Transactional
     @RabbitListener(queues = "user.delete.request.queue")

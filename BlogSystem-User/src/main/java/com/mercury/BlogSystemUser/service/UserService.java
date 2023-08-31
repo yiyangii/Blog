@@ -38,8 +38,6 @@ public class UserService {
     }
 
 
-    private static final String ROUTING_KEY_FOLLOW_COMMUNITY = "follow.community";
-    private static final String ROUTING_KEY_NEW_COMMUNITY = "new.community";
     private static final String EXCHANGE_NAME = "blog.exchange";
     private static final String ROUTING_KEY_USER_DELETE_REQUEST = "user.delete.request";
     private static final String ROUTING_KEY_USER_DELETE_FAILED = "user.delete.failed";

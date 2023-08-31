@@ -160,11 +160,12 @@ public class CommunityService {
         }
     }
 
+
+
     @Transactional
     @RabbitListener(queues = "communityDeletedForPostQueue")
     public void handleCommunityPostsDeleted(Long communityId){
         try {
-
             blogCommunityRepository.deleteById(communityId);
         } catch (Exception e) {
             logger.error("Error while deleting community ID: {}", communityId, e);
@@ -174,4 +175,31 @@ public class CommunityService {
     }
 
 
+
+    @Transactional
+    @RabbitListener(queues = "postDeletedQueue")
+    public void handlePostDelete(Long postId) {
+        try {
+            // 检查是否有与这个 post 相关联的社群
+            List<BlogPostCommunity> relatedCommunities = blogPostCommunityRepository.findAllByPostId(postId);
+
+            if (!relatedCommunities.isEmpty()) {
+                // 删除所有相关联的记录
+                blogPostCommunityRepository.deleteBypostId(postId);
+                logger.info("Deleted post with ID: {}", postId);
+
+                // 发送确认消息
+                rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.ROUTING_KEY_POST_DELETED_ACK, postId);
+            } else {
+                // 如果没有相关联的社群，直接发送确认消息
+                rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.ROUTING_KEY_POST_DELETED_ACK, postId);
+            }
+
+        } catch (Exception e) {
+            logger.error("Error while processing delete request for post ID: {}", postId, e);
+        }
+    }
 }
+
+
+

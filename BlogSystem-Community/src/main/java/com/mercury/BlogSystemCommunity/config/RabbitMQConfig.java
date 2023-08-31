@@ -16,10 +16,17 @@ public class RabbitMQConfig {
 
     private static final String ROUTING_KEY_COMMUNITY_DELETED_FOR_USER = "community.deleted.for.user";
     private static final String ROUTING_KEY_USER_DELETE_FAILED = "user.delete.failed";
+    public static final String ROUTING_KEY_POST_DELETED_ACK = "blog.post.deleted.ack";
+
+
 
 
     public static final String ROUTING_KEY_COMMUNITY_RELATED_DELETED = "community.related.deleted";
 
+    @Bean
+    public Queue postDeletedAckQueue() {
+        return new Queue("postDeletedAckQueue");
+    }
     @Bean
     public Queue communityRelatedDeletedQueue() {
         return new Queue("communityRelatedDeletedQueue");
@@ -97,6 +104,11 @@ public class RabbitMQConfig {
     @Bean
     public Binding bindingCommunityRelatedDeleted(Queue communityRelatedDeletedQueue, TopicExchange communityExchange) {
         return BindingBuilder.bind(communityRelatedDeletedQueue).to(communityExchange).with(ROUTING_KEY_COMMUNITY_RELATED_DELETED);
+    }
+
+    @Bean
+    public Binding bindingPostDeletedAck(Queue postDeletedAckQueue, TopicExchange communityExchange) {
+        return BindingBuilder.bind(postDeletedAckQueue).to(communityExchange).with(ROUTING_KEY_POST_DELETED_ACK);
     }
 
 }
