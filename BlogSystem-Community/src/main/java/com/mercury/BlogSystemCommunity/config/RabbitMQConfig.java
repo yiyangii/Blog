@@ -12,7 +12,18 @@ public class RabbitMQConfig {
     public static final String ROUTING_KEY_FOLLOW_COMMUNITY = "follow.community";
     public static final String ROUTING_KEY_UNFOLLOW_COMMUNITY = "unfollow.community";
     public static final String ROUTING_KEY_DELETE_COMMUNITY = "delete.community";
+    public static final String ROUTING_KEY_DELETE_COMMUNITY_POSTS = "community.deleted.for.post";
 
+    private static final String ROUTING_KEY_COMMUNITY_DELETED_FOR_USER = "community.deleted.for.user";
+    private static final String ROUTING_KEY_USER_DELETE_FAILED = "user.delete.failed";
+
+
+    public static final String ROUTING_KEY_COMMUNITY_RELATED_DELETED = "community.related.deleted";
+
+    @Bean
+    public Queue communityRelatedDeletedQueue() {
+        return new Queue("communityRelatedDeletedQueue");
+    }
     @Bean
     public TopicExchange communityExchange() {
         return new TopicExchange(EXCHANGE_NAME);
@@ -37,6 +48,30 @@ public class RabbitMQConfig {
     public Queue deleteCommunityQueue() {
         return new Queue("deleteCommunityQueue");
     }
+    @Bean
+    public Queue communityDeletedForUserQueue() {
+        return new Queue("communityDeletedForUserQueue");
+    }
+
+    @Bean
+    public Queue communityDeletedForPostQueue(){
+        return new Queue("communityDeletedForPostQueue");
+    }
+
+    @Bean
+    public Queue userDeleteFailedQueue() {
+        return new Queue("userDeleteFailedQueue");
+    }
+
+    @Bean
+    public Binding bindingCommunityDeletedForUser(Queue communityDeletedForUserQueue, TopicExchange communityExchange) {
+        return BindingBuilder.bind(communityDeletedForUserQueue).to(communityExchange).with(ROUTING_KEY_COMMUNITY_DELETED_FOR_USER);
+    }
+
+    @Bean
+    public Binding bindingUserDeleteFailed(Queue userDeleteFailedQueue, TopicExchange communityExchange) {
+        return BindingBuilder.bind(userDeleteFailedQueue).to(communityExchange).with(ROUTING_KEY_USER_DELETE_FAILED);
+    }
 
 
     @Bean
@@ -57,6 +92,11 @@ public class RabbitMQConfig {
     @Bean
     public Binding bindingDeleteCommunity(Queue deleteCommunityQueue, TopicExchange communityExchange) {
         return BindingBuilder.bind(deleteCommunityQueue).to(communityExchange).with(ROUTING_KEY_DELETE_COMMUNITY);
+    }
+
+    @Bean
+    public Binding bindingCommunityRelatedDeleted(Queue communityRelatedDeletedQueue, TopicExchange communityExchange) {
+        return BindingBuilder.bind(communityRelatedDeletedQueue).to(communityExchange).with(ROUTING_KEY_COMMUNITY_RELATED_DELETED);
     }
 
 }

@@ -41,6 +41,9 @@ public class PostService {
     private static final String ROUTING_KEY_POST_UPDATED = "blog.post.updated";
     private static final String ROUTING_KEY_POST_DELETED = "blog.post.deleted";
 
+    private static final String ROUTING_KEY_POST_COMMUNITY = "blog.post.community";
+
+
 
 
     @Autowired
@@ -242,7 +245,7 @@ public class PostService {
 
 
 
-            //rabbitTemplate.convertAndSend(EXCHANGE_NAME, ROUTING_KEY_POST_COMMUNITY, message);
+            rabbitTemplate.convertAndSend(EXCHANGE_NAME, ROUTING_KEY_POST_COMMUNITY, message);
             logger.info("send to community");
 
 

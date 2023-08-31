@@ -225,14 +225,14 @@ BEFORE INSERT ON post_service.blog_image
 FOR EACH ROW
 EXECUTE FUNCTION post_service.set_blog_image_id();
 
-
-
 select * from post_service.blog_post_category
 select * from post_service.blog_category
 select * from post_service.blog_post
 select * from user_service.users
 select * from post_service.blog_post_tag
 select * from post_service.blog_image
+select * from community_service.blog_community
+
 
 /*Post save测试*/
 {
@@ -312,7 +312,7 @@ CREATE SEQUENCE community_service.community_id_seq;
 select * from user_service.users;
 
 
-http://localhost:8087/api/community/create
+    http://localhost:8087/api/community/create
 /* community create */
 {
   "communityName": "NewCommunity",

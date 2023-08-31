@@ -9,4 +9,6 @@ public interface BlogUserCommunityRepository extends JpaRepository<BlogUserCommu
     void deleteByUserIdAndCommunityId(Long userId, Long communityId);
 
     void deleteByCommunityId(Long communityId);
+
+    void deleteByUserId(Long userId);
 }

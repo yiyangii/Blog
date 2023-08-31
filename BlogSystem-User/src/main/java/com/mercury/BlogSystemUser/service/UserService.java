@@ -3,6 +3,7 @@ package com.mercury.BlogSystemUser.service;
 
 import com.mercury.BlogSystemUser.bean.User;
 import com.mercury.BlogSystemUser.dao.UserRepository;
+import lombok.Data;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,15 +11,25 @@ import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.Date;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class UserService {
+    @Data
+    class UserDeleteStatus {
+        private boolean postsDeleted;
+        private boolean communityRelatedDeleted;
+        // getters and setters
+    }
 
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
     private final UserRepository userRepository;
     private final RabbitTemplate rabbitTemplate;
+
+    Map<Long, UserDeleteStatus> userDeleteStatusMap = new ConcurrentHashMap<>();
 
     @Autowired
     public UserService(UserRepository userRepository, RabbitTemplate rabbitTemplate) {
@@ -46,6 +57,8 @@ public class UserService {
     }
 
     public User saveUser(User user) {
+        System.out.println(user);
+        user.setRegistrationDate(new Date(System.currentTimeMillis()));
         User savedUser = userRepository.save(user);
         rabbitTemplate.convertAndSend(EXCHANGE_NAME,ROUTING_KEY_USER_CREATED,savedUser);
         return userRepository.save(user);
@@ -65,14 +78,46 @@ public class UserService {
         }
     }
 
+//    @RabbitListener(queues = "posts.deleted.for.user.queue")
+//    public void handlePostsDeletedForUser(Long userId) {
+//        try {
+//            userRepository.deleteById(userId);
+//            logger.info("Successfully deleted user with ID: " + userId);
+//        } catch (Exception e) {
+//            logger.error("Error deleting user with ID: " + userId, e);
+//            rabbitTemplate.convertAndSend(EXCHANGE_NAME, ROUTING_KEY_USER_DELETE_FAILED, userId);
+//        }
+//    }
+
     @RabbitListener(queues = "posts.deleted.for.user.queue")
     public void handlePostsDeletedForUser(Long userId) {
-        try {
-            userRepository.deleteById(userId);
-            logger.info("Successfully deleted user with ID: " + userId);
-        } catch (Exception e) {
-            logger.error("Error deleting user with ID: " + userId, e);
-            rabbitTemplate.convertAndSend(EXCHANGE_NAME, ROUTING_KEY_USER_DELETE_FAILED, userId);
+        logger.info("receive post deleted");
+        UserDeleteStatus status = userDeleteStatusMap.getOrDefault(userId, new UserDeleteStatus());
+        status.setPostsDeleted(true);
+        userDeleteStatusMap.put(userId, status);
+        checkAndDeleteUser(userId);
+    }
+
+    @RabbitListener(queues = "communityRelatedDeletedQueue")
+    public void handleCommunityRelatedDeletedForUser(Long userId) {
+        logger.info("receive community deleted");
+
+        UserDeleteStatus status = userDeleteStatusMap.getOrDefault(userId, new UserDeleteStatus());
+        status.setCommunityRelatedDeleted(true);
+        userDeleteStatusMap.put(userId, status);
+        checkAndDeleteUser(userId);
+    }
+
+    private void checkAndDeleteUser(Long userId) {
+        UserDeleteStatus status = userDeleteStatusMap.getOrDefault(userId, new UserDeleteStatus());
+        if (status.isPostsDeleted() && status.isCommunityRelatedDeleted()) {
+            try {
+                userRepository.deleteById(userId);
+                logger.info("Successfully deleted user with ID: " + userId);
+                userDeleteStatusMap.remove(userId); // 清除状态
+            } catch (Exception e) {
+                logger.error("Error deleting user with ID: " + userId, e);
+            }
         }
     }
 

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -97,6 +98,8 @@ public class CommunityService {
             if(community.get().getCommunityCreator().equals(userId)) {
                 // 删除所有与社群相关的 blog_user_community 记录
                 blogUserCommunityRepository.deleteByCommunityId(communityId);
+                blogPostCommunityRepository.deleteByCommunityId(communityId);
+                blogUserCommunityRepository.deleteByUserId(userId);
 
                 // 然后删除社群
                 blogCommunityRepository.deleteById(communityId);
@@ -119,20 +122,54 @@ public class CommunityService {
         }
     }
 
-    //@RabbitListener(queues = "post.community.queue")
+    @RabbitListener(queues = "postCommunityQueue")
     public void handlePostCommunityMessage(Map<String, Object> message) {
-        Long postId = (Long) message.get("postId");
-        String communityName = (String) message.get("communityName");
 
-        // 从communityName获取communityId，这取决于你如何设计你的数据模型和DAO
-        Long communityId = blogCommunityRepository.getCommunityIdBycommunityName(communityName);  // 示例方法，请根据实际情况来实现
+            int postId = (int) message.get("postId");
+            String communityName = (String) message.get("communityName");
 
-        BlogPostCommunity relation = new BlogPostCommunity();
-        relation.setPostId(postId);
-        relation.setCommunityId(communityId);
+            Long communityId = blogCommunityRepository.getCommunityIdBycommunityName(communityName);
 
-        blogPostCommunityRepository.save(relation);
-        logger.info("Successfully saved the relation between postId {} and communityId {}", postId, communityId);
+            BlogPostCommunity relation = new BlogPostCommunity();
+            relation.setPostId((long) postId);
+            relation.setCommunityId(communityId);
+
+            blogPostCommunityRepository.save(relation);
+            logger.info("Successfully saved the relation between postId {} and communityId {}", postId, communityId);
+    }
+    @Transactional
+    @RabbitListener(queues = "user.delete.request.queue")
+    public void handleUserDeleteRequest(Long userId) {
+        try {
+            blogUserCommunityRepository.deleteByUserId(userId);
+
+            List<BlogCommunity> communitiesCreatedByUser = blogCommunityRepository.findAllBycommunityCreator(userId);
+            for (BlogCommunity community : communitiesCreatedByUser) {
+                deleteCommunity(community.getId(),userId);
+                rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.ROUTING_KEY_DELETE_COMMUNITY_POSTS, community.getId());
+                logger.info("delete community id " + community.getId());
+
+            }
+            rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.ROUTING_KEY_COMMUNITY_RELATED_DELETED, userId);
+            logger.info("send delete community message to user service");
+
+
+
+        } catch (Exception e) {
+            logger.error("Error while processing delete request for user ID: {}", userId, e);
+        }
+    }
+
+    @Transactional
+    @RabbitListener(queues = "communityDeletedForPostQueue")
+    public void handleCommunityPostsDeleted(Long communityId){
+        try {
+
+            blogCommunityRepository.deleteById(communityId);
+        } catch (Exception e) {
+            logger.error("Error while deleting community ID: {}", communityId, e);
+
+        }
 
     }
 

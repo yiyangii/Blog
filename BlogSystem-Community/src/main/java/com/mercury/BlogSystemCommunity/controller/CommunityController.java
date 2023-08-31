@@ -43,8 +43,6 @@ public class CommunityController {
     @DeleteMapping("/delete/{communityId}")
     public ResponseEntity<String> deleteCommunity(@PathVariable Long communityId, @RequestBody Map<String, Long> body) {
         Long userId = body.get("userId");
-        System.out.println(userId);
-        System.out.println(communityId);
         String message = communityService.deleteCommunity(communityId, userId);
 
         if ("Deleted community successfully".equals(message)) {
