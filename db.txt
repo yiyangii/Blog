@@ -202,8 +202,14 @@ select * from post_service.blog_category
 select * from post_service.blog_post
 select * from user_service.users
 select * from post_service.blog_post_tag
-select * from post_service.blog_post_tag
 select * from post_service.blog_image
+select * from community_service.blog_community
+select * from community_service.blog_post_community
+select * from community_service.blog_user_community
+
+
+
+
 
 CREATE SEQUENCE post_service.blog_image_id_seq
 
