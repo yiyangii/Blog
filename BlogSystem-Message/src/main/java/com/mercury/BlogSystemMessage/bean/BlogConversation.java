@@ -5,28 +5,27 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import java.util.Date;
+import java.io.Serializable;
+import java.util.List;
 
 @Data
 @Entity
 @ToString
 @NoArgsConstructor
-@Table(name = "blog_direct_message", schema = "message_service")
-public class BlogConversation {
+@Table(name = "blog_conversation", schema = "message_service")
+public class BlogConversation implements Serializable {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "blog_conversation_seq")
+    @SequenceGenerator(name = "blog_conversation_seq", sequenceName = "blog_conversation_seq", allocationSize = 1)
     private Long id;
-    @Column(name = "conversation_id")
-    private int conversationId;
 
-    @Column(name = "sender_id")
-    private int senderId;
+    @Column(name = "user1_id")
+    private Long user1Id;
 
-    private String content;
+    @Column(name = "user2_id")
+    private Long user2Id;
 
-    @Column(name = "creation_date")
-    private Date creationDate = new Date(System.currentTimeMillis());
-
-    private boolean read;
-
+    @OneToMany(mappedBy = "conversation")
+    private List<BlogDirectMessage> messages;
 }
+

@@ -122,6 +122,13 @@ CREATE TABLE message_service.blog_direct_message (
     creation_date DATE,
     read BOOLEAN DEFAULT FALSE
 );
+ALTER TABLE user_service.users ADD COLUMN is_active BOOLEAN DEFAULT FALSE;
+ALTER TABLE blog_service.blogs ADD COLUMN is_frequently_commented BOOLEAN DEFAULT FALSE;
+CREATE INDEX idx_is_active ON user_service.users(is_active);
+CREATE INDEX idx_is_frequently_commented ON blog_service.blogs(is_frequently_commented);
+CREATE SEQUENCE blog_conversation_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE blog_direct_message_seq START WITH 1 INCREMENT BY 1;
+
 
 -- FollowService
 CREATE SCHEMA follow_service;
