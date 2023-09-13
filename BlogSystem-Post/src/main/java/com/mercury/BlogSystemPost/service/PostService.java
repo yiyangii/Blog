@@ -1,6 +1,7 @@
 package com.mercury.BlogSystemPost.service;
 
 import com.mercury.BlogSystemPost.bean.*;
+import com.mercury.BlogSystemPost.config.PostRabbitMQConfig;
 import com.mercury.BlogSystemPost.dao.*;
 
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -204,7 +205,7 @@ public class PostService {
     @RabbitListener(queues = "postDeletedAckQueue")
     public void handlePostDeleteAck(int id) {
         try {
-            // 收到确认消息后，执行实际的删除操作
+
             actualDeletePost((long) id);
         } catch (Exception e) {
             logger.error("Error while deleting post ID: {}", id, e);
@@ -215,15 +216,18 @@ public class PostService {
 
 
 
+
     @Transactional
-    @RabbitListener(queues = "user.delete.request.queue")
+    @RabbitListener(queues = "queue.user.delete.request.post")
     public void handleUserDeleteRequest(Long userId) {
+        logger.info("receive delete request");
         try {
             postRepository.deleteByAuthorId(userId);
-            rabbitTemplate.convertAndSend(EXCHANGE_NAME, ROUTING_KEY_POSTS_DELETED_FOR_USER, userId);
+            rabbitTemplate.convertAndSend(PostRabbitMQConfig.EXCHANGE_NAME, PostRabbitMQConfig.ROUTING_KEY_POST_DELETED_USER, userId);
+            logger.info("send delete message to user service");
         } catch(Exception e) {
             rabbitTemplate.convertAndSend(EXCHANGE_NAME, ROUTING_KEY_USER_DELETE_FAILED, userId);
-            logger.error("Error deleting posts for user ID: " + userId, e);
+            logger.error("Error deleting posts for user ID: " + userId , e);
         }
     }
 

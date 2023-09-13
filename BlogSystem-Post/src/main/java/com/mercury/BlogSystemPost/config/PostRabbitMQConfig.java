@@ -13,6 +13,9 @@ public class PostRabbitMQConfig {
     public static final String EXCHANGE_NAME = "blog.exchange";
 
     public static final String ROUTING_KEY_POST_CREATED = "blog.post.created";
+
+    public static final String ROUTING_KEY_POST_DELETED_USER = "blog.post.deleted_user";
+
     public static final String ROUTING_KEY_POST_UPDATED = "blog.post.updated";
     public static final String ROUTING_KEY_POST_DELETED = "blog.post.deleted";
     public static final String ROUTING_KEY_POST_COMMUNITY = "blog.post.community";
@@ -43,6 +46,16 @@ public class PostRabbitMQConfig {
     @Bean
     public Queue postCommunityQueue() {
         return new Queue("postCommunityQueue");
+    }
+
+    @Bean
+    public Queue postDeletedUserQueue() {
+        return new Queue("postDeletedUserQueue");
+    }
+
+    @Bean
+    public Binding bindingPostDeletedUser(Queue postDeletedUserQueue, TopicExchange blogExchange) {
+        return BindingBuilder.bind(postDeletedUserQueue).to(blogExchange).with(ROUTING_KEY_POST_DELETED_USER);
     }
 
     @Bean

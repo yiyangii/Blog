@@ -74,10 +74,10 @@ public class CommunityService {
     }
 
     public String unfollowCommunity(Long userId, Long communityId) {
-        // 从数据库中删除关注关系
+
         blogUserCommunityRepository.deleteByUserIdAndCommunityId(userId, communityId);
 
-        // 发送取消关注的消息
+
         Map<String, Object> unfollowMessage = new HashMap<>();
         unfollowMessage.put("type", "UNFOLLOW_COMMUNITY");
         unfollowMessage.put("userId", userId);
@@ -96,15 +96,14 @@ public class CommunityService {
 
         if(community.isPresent()) {
             if(community.get().getCommunityCreator().equals(userId)) {
-                // 删除所有与社群相关的 blog_user_community 记录
+
                 blogUserCommunityRepository.deleteByCommunityId(communityId);
                 blogPostCommunityRepository.deleteByCommunityId(communityId);
                 blogUserCommunityRepository.deleteByUserId(userId);
 
-                // 然后删除社群
+
                 blogCommunityRepository.deleteById(communityId);
 
-                // 发送消息
                 Map<String, Object> deleteMessage = new HashMap<>();
                 deleteMessage.put("type", "DELETE_COMMUNITY");
                 deleteMessage.put("communityId", communityId);
@@ -122,6 +121,7 @@ public class CommunityService {
         }
     }
 
+
     @RabbitListener(queues = "postCommunityQueue")
     public void handlePostCommunityMessage(Map<String, Object> message) {
 
@@ -137,9 +137,11 @@ public class CommunityService {
             blogPostCommunityRepository.save(relation);
             logger.info("Successfully saved the relation between postId {} and communityId {}", postId, communityId);
     }
+
     @Transactional
-    @RabbitListener(queues = "user.delete.request.queue")
+    @RabbitListener(queues = "queue.user.delete.request.community")
     public void handleUserDeleteRequest(Long userId) {
+        logger.info("receive delete request");
         try {
             blogUserCommunityRepository.deleteByUserId(userId);
 
@@ -180,18 +182,14 @@ public class CommunityService {
     @RabbitListener(queues = "postDeletedQueue")
     public void handlePostDelete(Long postId) {
         try {
-            // 检查是否有与这个 post 相关联的社群
             List<BlogPostCommunity> relatedCommunities = blogPostCommunityRepository.findAllByPostId(postId);
 
             if (!relatedCommunities.isEmpty()) {
-                // 删除所有相关联的记录
                 blogPostCommunityRepository.deleteBypostId(postId);
                 logger.info("Deleted post with ID: {}", postId);
 
-                // 发送确认消息
                 rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.ROUTING_KEY_POST_DELETED_ACK, postId);
             } else {
-                // 如果没有相关联的社群，直接发送确认消息
                 rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.ROUTING_KEY_POST_DELETED_ACK, postId);
             }
 

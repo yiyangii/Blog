@@ -1,152 +1,115 @@
 package com.mercury.BlogSystemUser.service;
 
 
+import com.mercury.BlogSystemUser.bean.Role;
 import com.mercury.BlogSystemUser.bean.User;
+import com.mercury.BlogSystemUser.bean.UserRole;
+import com.mercury.BlogSystemUser.config.UserRabbitMQConfig;
+import com.mercury.BlogSystemUser.dao.RoleRepository;
 import com.mercury.BlogSystemUser.dao.UserRepository;
+import com.mercury.BlogSystemUser.dao.UserRoleRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.Data;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Date;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class UserService {
-    @Data
-    class UserDeleteStatus {
-        private boolean postsDeleted;
-        private boolean communityRelatedDeleted;
-        // getters and setters
-    }
+
 
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
     private final UserRepository userRepository;
     private final RabbitTemplate rabbitTemplate;
 
-    Map<Long, UserDeleteStatus> userDeleteStatusMap = new ConcurrentHashMap<>();
+    private final StringRedisTemplate stringRedisTemplate;
+    private final RoleRepository roleRepository;
+    private final UserRoleRepository userRoleRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
 
     @Autowired
-    public UserService(UserRepository userRepository, RabbitTemplate rabbitTemplate) {
+    public UserService(UserRepository userRepository, RabbitTemplate rabbitTemplate, StringRedisTemplate stringRedisTemplate, RoleRepository roleRepository, UserRoleRepository userRoleRepository) {
         this.userRepository = userRepository;
         this.rabbitTemplate = rabbitTemplate;
+        this.stringRedisTemplate = stringRedisTemplate;
+        this.roleRepository = roleRepository;
+        this.userRoleRepository = userRoleRepository;
     }
 
-
-    private static final String EXCHANGE_NAME = "blog.exchange";
-    private static final String ROUTING_KEY_USER_DELETE_REQUEST = "user.delete.request";
-    private static final String ROUTING_KEY_USER_DELETE_FAILED = "user.delete.failed";
-
-    private static final String ROUTING_KEY_USER_CREATED = "user.created";
-    private static final String ROUTING_KEY_USER_UPDATED = "user.updated";
-    private static final String ROUTING_KEY_USER_QUERIED = "user.queried";
 
     public Optional<User> getUserById(long id) {
         Optional<User> user = userRepository.findById(id);
         if(user.isPresent()){
-            rabbitTemplate.convertAndSend(EXCHANGE_NAME,ROUTING_KEY_USER_QUERIED,id);
+            //Send Query notification to Queue : queue.user.query
+            rabbitTemplate.convertAndSend(UserRabbitMQConfig.EXCHANGE_USER,UserRabbitMQConfig.ROUTING_KEY_USER_QUERIED,id);
         }
         return userRepository.findById(id);
     }
 
     public User saveUser(User user) {
-        System.out.println(user);
         user.setRegistrationDate(new Date(System.currentTimeMillis()));
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         User savedUser = userRepository.save(user);
-        rabbitTemplate.convertAndSend(EXCHANGE_NAME,ROUTING_KEY_USER_CREATED,savedUser);
+
+        rabbitTemplate.convertAndSend(UserRabbitMQConfig.EXCHANGE_USER,UserRabbitMQConfig.ROUTING_KEY_USER_CREATED,savedUser);
         return userRepository.save(user);
     }
 
+    @Transactional
     public void requestDeleteUser(long id) {
-        rabbitTemplate.convertAndSend(EXCHANGE_NAME, ROUTING_KEY_USER_DELETE_REQUEST, id);
+        rabbitTemplate.convertAndSend(UserRabbitMQConfig.EXCHANGE_USER_DELETE, "", id);
+
     }
 
     public User updateUser(User user) {
         if (userRepository.existsById(user.getId())) {
             User updatedUser = userRepository.save(user);
-            rabbitTemplate.convertAndSend(EXCHANGE_NAME, ROUTING_KEY_USER_UPDATED, updatedUser);
+            rabbitTemplate.convertAndSend(UserRabbitMQConfig.EXCHANGE_USER, UserRabbitMQConfig.ROUTING_KEY_USER_UPDATED, updatedUser);
             return updatedUser;
         } else {
             throw new RuntimeException("User not found");
         }
     }
 
-//    @RabbitListener(queues = "posts.deleted.for.user.queue")
-//    public void handlePostsDeletedForUser(Long userId) {
-//        try {
-//            userRepository.deleteById(userId);
-//            logger.info("Successfully deleted user with ID: " + userId);
-//        } catch (Exception e) {
-//            logger.error("Error deleting user with ID: " + userId, e);
-//            rabbitTemplate.convertAndSend(EXCHANGE_NAME, ROUTING_KEY_USER_DELETE_FAILED, userId);
-//        }
-//    }
 
-    @RabbitListener(queues = "posts.deleted.for.user.queue")
-    public void handlePostsDeletedForUser(Long userId) {
-        logger.info("receive post deleted");
-        UserDeleteStatus status = userDeleteStatusMap.getOrDefault(userId, new UserDeleteStatus());
-        status.setPostsDeleted(true);
-        userDeleteStatusMap.put(userId, status);
-        checkAndDeleteUser(userId);
-    }
-
-    @RabbitListener(queues = "communityRelatedDeletedQueue")
-    public void handleCommunityRelatedDeletedForUser(Long userId) {
-        logger.info("receive community deleted");
-
-        UserDeleteStatus status = userDeleteStatusMap.getOrDefault(userId, new UserDeleteStatus());
-        status.setCommunityRelatedDeleted(true);
-        userDeleteStatusMap.put(userId, status);
-        checkAndDeleteUser(userId);
-    }
-
-    private void checkAndDeleteUser(Long userId) {
-        UserDeleteStatus status = userDeleteStatusMap.getOrDefault(userId, new UserDeleteStatus());
-        if (status.isPostsDeleted() && status.isCommunityRelatedDeleted()) {
-            try {
-                userRepository.deleteById(userId);
-                logger.info("Successfully deleted user with ID: " + userId);
-                userDeleteStatusMap.remove(userId); // 清除状态
-            } catch (Exception e) {
-                logger.error("Error deleting user with ID: " + userId, e);
-            }
-        }
-    }
-
-    @RabbitListener(queues = "user.delete.failed.queue")
-    public void handleUserDeleteFailed(Long userId) {
-        logger.error("Failed to delete user with ID: " + userId);
-    }
-
-    @RabbitListener(queues = "followCommunityQueue")
-    public void handleUserFollowedCommunity(Map<String, Object> message) {
+    @Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED)
+    public User saveUserWithRoles(User user) {
         try {
-            Long userId = (Long) message.get("userId");
-            Long communityId = (Long) message.get("communityId");
-            logger.info("User with ID: " + userId + " has followed the community with ID: " + communityId);
-
+            user.setRegistrationDate(new Date(System.currentTimeMillis()));
+            Set<UserRole> userRoles = user.getUserRoles();
+            userRoles.forEach((userRole)->{
+                Role role = (Role) roleRepository.findById(userRole.getRole().getId()).get();
+                userRole.setRole(role);
+                userRole.setUser(user);
+            });
+            User savedUser = userRepository.save(user);
+            return savedUser;
         } catch (Exception e) {
-            logger.error("Error handling follow community message", e);
+            throw new RuntimeException("Error while saving the user and roles", e);
         }
     }
 
-    @RabbitListener(queues = "newCommunityQueue")
-    public void handleNewCommunityCreated(Map<String, Object> message) {
-        try {
-            Long communityId = (Long) message.get("communityId");
-            Long userId = (Long) message.get("userId");
-            logger.info("New community with ID: " + communityId + " has been created by user with ID: " + userId);
 
-        } catch (Exception e) {
-            logger.error("Error handling new community message", e);
-        }
-    }
+
+
 
 
 

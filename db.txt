@@ -10,13 +10,11 @@ CREATE TABLE user_service.users (
     registration_date DATE
 );
 
--- UserRole Service
-CREATE SCHEMA role_service;
-
-CREATE TABLE role_service.role (
-    id INT PRIMARY KEY,
-    type VARCHAR(255) NOT NULL
+CREATE TABLE user_service.user_roles (
+    id SERIAL PRIMARY KEY,
+    role VARCHAR(50) UNIQUE NOT NULL
 );
+
 
 CREATE TABLE role_service.user_role (
     user_id INT REFERENCES user_service.users(id),
@@ -207,12 +205,17 @@ EXECUTE FUNCTION set_user_id();
 select * from post_service.blog_post_category
 select * from post_service.blog_category
 select * from post_service.blog_post
-select * from user_service.users
 select * from post_service.blog_post_tag
 select * from post_service.blog_image
+
+
 select * from community_service.blog_community
 select * from community_service.blog_post_community
 select * from community_service.blog_user_community
+
+select * from user_service.users
+select * from user_service.role
+select * from user_service.user_role
 
 
 

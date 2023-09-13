@@ -11,4 +11,5 @@ import java.util.Set;
 public interface PostRepository extends JpaRepository<Post, Long> {
     void deleteByAuthorId(Long authorId);
 
+    Post findByAuthorId(Long userId);
 }

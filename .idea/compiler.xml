@@ -12,10 +12,12 @@
         <module name="BlogSystem-Message" />
         <module name="BlogSystem-Community" />
         <module name="eureka" />
+        <module name="BlogSystem-Gateway" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="BlogSystem-Community" target="17" />
+      <module name="BlogSystem-Gateway" target="17" />
       <module name="BlogSystem-Message" target="17" />
       <module name="BlogSystem-Post" target="17" />
       <module name="BlogSystem-User" target="17" />
@@ -26,6 +28,7 @@
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="BlogSystem-Community" options="-parameters" />
+      <module name="BlogSystem-Gateway" options="-parameters" />
       <module name="BlogSystem-Message" options="-parameters" />
       <module name="BlogSystem-Post" options="-parameters" />
       <module name="BlogSystem-User" options="-parameters" />

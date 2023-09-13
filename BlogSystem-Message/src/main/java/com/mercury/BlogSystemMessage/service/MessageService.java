@@ -38,35 +38,45 @@ public class MessageService {
         return conversation;
     }
 
-    public BlogDirectMessage sendMessage(Long conversationId, Long senderId, Long receiverId, String content) {
+    public BlogDirectMessage sendMessage(BlogDirectMessage blogDirectMessage, Long conversationId) {
+        System.out.println(conversationId);
 
         BlogConversation conversation = blogConversationDao.findById(conversationId).orElse(null);
 
-        if (conversation != null &&
-                (conversation.getUser1Id().equals(senderId) && conversation.getUser2Id().equals(receiverId) ||
-                        conversation.getUser1Id().equals(receiverId) && conversation.getUser2Id().equals(senderId))) {
 
+        if (conversation == null) {
+            logger.error("Conversation with ID " + conversationId + " not found");
+            return null;
+        }
+
+        Long senderId = blogDirectMessage.getSenderId();
+        Long receiverId = blogDirectMessage.getReceiverId();
+        String content = blogDirectMessage.getContent();
+
+        if (conversation.getUser1Id().equals(senderId) && conversation.getUser2Id().equals(receiverId) ||
+                conversation.getUser1Id().equals(receiverId) && conversation.getUser2Id().equals(senderId)) {
 
             BlogDirectMessage message = new BlogDirectMessage();
             message.setConversation(conversation);
             message.setSenderId(senderId);
             message.setContent(content);
             message.setCreationDate(new Date(System.currentTimeMillis()));
+            message.setReceiverId(receiverId);
             message.setRead(false);
 
             return blogDirectMessageDao.save(message);
         } else {
-            logger.error("Blog Direct Message null");
+            logger.error("User IDs do not match with the conversation");
             return null;
         }
     }
+
 
     public boolean deleteMessage(Long messageId) {
         try {
             blogDirectMessageDao.deleteById(messageId);
             return true;
         } catch (Exception e) {
-            // Log the exception and handle it as appropriate
             logger.error(e.getMessage());
             return false;
         }

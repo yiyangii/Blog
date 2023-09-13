@@ -1,10 +1,13 @@
 package com.mercury.BlogSystemUser.bean;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.sql.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @Entity
@@ -29,6 +32,12 @@ public class User implements Serializable {
 
     @Column(name = "registration_date")
     private Date registrationDate;
+
+
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<UserRole> userRoles = new HashSet<>();
+
 
     public User(int id, String username, String email, String password, String bio, Date registrationDate) {
         this.id = id;

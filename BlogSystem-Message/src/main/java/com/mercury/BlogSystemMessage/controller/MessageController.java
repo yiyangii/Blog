@@ -27,8 +27,13 @@ public class MessageController {
     }
 
     @PostMapping("/send")
-    public ResponseEntity<BlogDirectMessage> sendMessage(@RequestParam Long conversationId, @RequestParam Long senderId, @RequestParam Long receiverId, @RequestParam String content) {
-        BlogDirectMessage message = messageService.sendMessage(conversationId, senderId, receiverId, content);
+    public ResponseEntity<BlogDirectMessage> sendMessage(@RequestBody BlogDirectMessage blogDirectMessage) {
+        Long conversationId = blogDirectMessage.getTransientConversationId();
+        if (conversationId == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        BlogDirectMessage message = messageService.sendMessage(blogDirectMessage,conversationId);
         if (message != null) {
             return ResponseEntity.ok(message);
         } else {

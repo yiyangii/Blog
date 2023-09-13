@@ -16,5 +16,5 @@ public class BlogPostCommunity {
 
 
 
-    // Standard getters and setters
+
 }
