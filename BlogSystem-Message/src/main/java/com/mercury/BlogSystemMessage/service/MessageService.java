@@ -2,12 +2,16 @@ package com.mercury.BlogSystemMessage.service;
 
 import com.mercury.BlogSystemMessage.bean.BlogConversation;
 import com.mercury.BlogSystemMessage.bean.BlogDirectMessage;
+import com.mercury.BlogSystemMessage.config.RabbitMQConfig;
 import com.mercury.BlogSystemMessage.dao.BlogConversationDao;
 import com.mercury.BlogSystemMessage.dao.BlogDirectMessageDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Date;
 import java.util.List;
@@ -16,6 +20,8 @@ import java.util.List;
 public class MessageService {
     private static final Logger logger = LoggerFactory.getLogger(MessageService.class);
 
+    @Autowired
+    RabbitTemplate rabbitTemplate;
     @Autowired
     private BlogDirectMessageDao blogDirectMessageDao;
     @Autowired
@@ -27,14 +33,28 @@ public class MessageService {
     }
 
     public BlogConversation getOrCreateConversation(BlogConversation c) {
-        BlogConversation conversation = blogConversationDao.findByUser1IdAndUser2Id(c.getUser1Id(),c.getUser2Id());
+        // Check if a conversation already exists between the two users
+        BlogConversation conversation = blogConversationDao.findByUser1IdAndUser2Id(c.getUser1Id(), c.getUser2Id());
+
         if (conversation == null) {
+            // Create a new conversation
             conversation = new BlogConversation();
             conversation.setUser1Id(c.getUser1Id());
             conversation.setUser2Id(c.getUser2Id());
-            conversation.setMessages(c.getMessages());
+
+            // Save the conversation to generate its ID
             conversation = blogConversationDao.save(conversation);
         }
+
+        // If messages are provided, associate them with the conversation and save
+        List<BlogDirectMessage> messages = c.getMessages();
+        if (messages != null && !messages.isEmpty()) {
+            for (BlogDirectMessage message : messages) {
+                message.setConversation(conversation);
+                blogDirectMessageDao.save(message);
+            }
+        }
+
         return conversation;
     }
 
@@ -82,6 +102,20 @@ public class MessageService {
         }
     }
 
+    @Transactional
+    @RabbitListener(queues = "queue.user.delete.request.message")
+    public void handleUserDeleteRequest(Long userId) {
+        logger.info("receive delete request");
+        try {
+            deleteConversationByUserId(userId);
+            rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.ROUTING_KEY_MESSAGE_DELETED_USER, userId);
+            logger.info("send delete message to user service");
+        } catch(Exception e) {
+            rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.ROUTING_KEY_USER_DELETE_FAILED, userId);
+            logger.error("Error deleting posts for user ID: " + userId , e);
+        }
+    }
+
     public boolean deleteConversation(Long conversationId) {
         try {
             List<BlogDirectMessage> messages = blogDirectMessageDao.findByConversationId(conversationId);
@@ -89,6 +123,24 @@ public class MessageService {
                 blogDirectMessageDao.delete(message);
             }
             blogConversationDao.deleteById(conversationId);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    public boolean deleteConversationByUserId(Long userId) {
+        try {
+            List<BlogDirectMessage> messages1 = blogDirectMessageDao.findBysenderId(userId);
+            for (BlogDirectMessage message : messages1) {
+                blogDirectMessageDao.delete(message);
+            }
+            blogConversationDao.deleteByuser1Id(userId);
+            List<BlogDirectMessage> messages2 = blogDirectMessageDao.findByreceiverId(userId);
+            for (BlogDirectMessage message : messages2) {
+                blogDirectMessageDao.delete(message);
+            }
+            blogConversationDao.deleteByuser2Id(userId);
+
             return true;
         } catch (Exception e) {
             return false;

@@ -1,5 +1,8 @@
 package com.mercury.BlogSystemGateway.config;
 
+import com.mercury.BlogSystemGateway.filter.JwtGlobalFilter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
@@ -8,8 +11,12 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class GatewayConfig {
 
+    @Autowired
+    private JwtGlobalFilter jwtGlobalFilter;
+
     @Bean
     public RouteLocator customRouteLocator(RouteLocatorBuilder routeLocatorBuilder) {
+
         return routeLocatorBuilder.routes()
                 .route("user_service", r -> r.path("/api/users/**")
                         .uri("lb://blog-system-User"))

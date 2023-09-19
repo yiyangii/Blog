@@ -9,4 +9,8 @@ import java.util.List;
 public interface BlogConversationDao extends JpaRepository<BlogConversation,Long> {
     BlogConversation findByUser1IdAndUser2Id(Long user1Id, Long user2Id);
 
+
+    void deleteByuser1Id(Long userId);
+
+    void deleteByuser2Id(Long userId);
 }

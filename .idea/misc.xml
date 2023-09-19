@@ -11,6 +11,7 @@
         <option value="$PROJECT_DIR$/BlogSystem-Message/pom.xml" />
         <option value="$PROJECT_DIR$/Blog-Gateway/pom.xml" />
         <option value="$PROJECT_DIR$/BlogSystem-Gateway/pom.xml" />
+        <option value="$PROJECT_DIR$/BlogSystem-Auth/pom.xml" />
       </list>
     </option>
   </component>

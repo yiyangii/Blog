@@ -16,6 +16,8 @@ public class UserRabbitMQConfig {
     public static final String QUEUE_USER_UPDATED = "queue.user.updated";
     public static final String QUEUE_USER_DELETE_REQUEST_COMMUNITY = "queue.user.delete.request.community";
     public static final String QUEUE_USER_DELETE_REQUEST_POST = "queue.user.delete.request.post";
+    public static final String QUEUE_USER_DELETE_REQUEST_MESSAGE = "queue.user.delete.request.message";
+
 
     public static final String QUEUE_USER_DELETE_FAILED = "queue.user.delete.failed";
     public static final String QUEUE_USER_Query = "queue.user.query";
@@ -24,6 +26,7 @@ public class UserRabbitMQConfig {
     public static final String ROUTING_KEY_USER_CREATED = "routing.user.created";
     public static final String ROUTING_KEY_USER_UPDATED = "routing.user.updated";
     public static final String ROUTING_KEY_USER_QUERIED = "routing.user.query";
+    public static final String LISTENER_QUEUE_USER_DETAIL = "UserDetailQueue";
 
     @Bean
     public FanoutExchange userExchange() {
@@ -43,6 +46,13 @@ public class UserRabbitMQConfig {
     public Queue userUpdatedQueue() {
         return new Queue(QUEUE_USER_UPDATED);
     }
+
+
+    @Bean
+    public Queue userDeleteRequestMessageQueue() {
+        return new Queue(QUEUE_USER_DELETE_REQUEST_MESSAGE);
+    }
+
 
     @Bean
     public Queue userDeleteRequestCommunityQueue() {
@@ -85,6 +95,11 @@ public class UserRabbitMQConfig {
     @Bean
     public Binding bindUserDeletePostRequest() {
         return BindingBuilder.bind(userDeleteRequestPostQueue()).to(userDeleteExchange());
+    }
+
+    @Bean
+    public Binding bindUserDeleteMessageRequest() {
+        return BindingBuilder.bind(userDeleteRequestMessageQueue()).to(userDeleteExchange());
     }
 
     @Bean
