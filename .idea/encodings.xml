@@ -4,6 +4,8 @@
     <file url="file://$PROJECT_DIR$/BlogSystem-Auth/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/BlogSystem-Auth/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/BlogSystem-Community/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/BlogSystem-Follow/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/BlogSystem-Follow/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/BlogSystem-Gateway/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/BlogSystem-Gateway/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/BlogSystem-Message/src/main/java" charset="UTF-8" />
@@ -11,6 +13,8 @@
     <file url="file://$PROJECT_DIR$/BlogSystem-Post/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/BlogSystem-User/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/BlogSystem-User/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/BlogSystem-UserBehaviour/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/BlogSystem-UserBehaviour/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/BlogSystemProject/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/BlogSystemProject/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/eureka/src/main/java" charset="UTF-8" />

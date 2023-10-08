@@ -17,6 +17,8 @@ public class UserRabbitMQConfig {
     public static final String QUEUE_USER_DELETE_REQUEST_COMMUNITY = "queue.user.delete.request.community";
     public static final String QUEUE_USER_DELETE_REQUEST_POST = "queue.user.delete.request.post";
     public static final String QUEUE_USER_DELETE_REQUEST_MESSAGE = "queue.user.delete.request.message";
+    public static final String QUEUE_USER_DELETE_REQUEST_FOLLOWER = "queue.user.delete.request.follower";
+
 
 
     public static final String QUEUE_USER_DELETE_FAILED = "queue.user.delete.failed";
@@ -65,6 +67,11 @@ public class UserRabbitMQConfig {
     }
 
     @Bean
+    public Queue userDeleteRequestFollowerQueue() {
+        return new Queue(QUEUE_USER_DELETE_REQUEST_FOLLOWER);
+    }
+
+    @Bean
     public Queue userDeleteFailedQueue() {
         return new Queue(QUEUE_USER_DELETE_FAILED);
     }
@@ -100,6 +107,10 @@ public class UserRabbitMQConfig {
     @Bean
     public Binding bindUserDeleteMessageRequest() {
         return BindingBuilder.bind(userDeleteRequestMessageQueue()).to(userDeleteExchange());
+    }
+    @Bean
+    public Binding bindUserDeleteFollowerRequest() {
+        return BindingBuilder.bind(userDeleteRequestFollowerQueue()).to(userDeleteExchange());
     }
 
     @Bean

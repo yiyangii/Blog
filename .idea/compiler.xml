@@ -12,17 +12,21 @@
         <module name="eureka" />
         <module name="BlogSystem-Post" />
         <module name="BlogSystem-Auth" />
+        <module name="BlogSystem-Follow" />
         <module name="BlogSystem-Message" />
         <module name="BlogSystem-Gateway" />
+        <module name="BlogSystem-UserBehaviour" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="BlogSystem-Auth" target="17" />
       <module name="BlogSystem-Community" target="17" />
+      <module name="BlogSystem-Follow" target="17" />
       <module name="BlogSystem-Gateway" target="17" />
       <module name="BlogSystem-Message" target="17" />
       <module name="BlogSystem-Post" target="17" />
       <module name="BlogSystem-User" target="17" />
+      <module name="BlogSystem-UserBehaviour" target="17" />
       <module name="BlogSystemProject" target="17" />
       <module name="eureka" target="17" />
     </bytecodeTargetLevel>
@@ -31,10 +35,12 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="BlogSystem-Auth" options="-parameters" />
       <module name="BlogSystem-Community" options="-parameters" />
+      <module name="BlogSystem-Follow" options="-parameters" />
       <module name="BlogSystem-Gateway" options="-parameters" />
       <module name="BlogSystem-Message" options="-parameters" />
       <module name="BlogSystem-Post" options="-parameters" />
       <module name="BlogSystem-User" options="-parameters" />
+      <module name="BlogSystem-UserBehaviour" options="-parameters" />
       <module name="BlogSystemProject" options="-parameters" />
       <module name="eureka" options="-parameters" />
     </option>

@@ -26,6 +26,6 @@ public class Image implements Serializable {
     @ManyToOne
     @JoinColumn(name = "post_id")
     @JsonIgnore
-    @EqualsAndHashCode.Include
+    @EqualsAndHashCode.Exclude
     private Post post;
 }

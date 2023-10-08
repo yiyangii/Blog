@@ -52,9 +52,17 @@ public class UserListener {
         private boolean postsDeleted;
         private boolean communityRelatedDeleted;
         private boolean messageDeleted;
+        private boolean followerDeleted;
     }
     Map<Long, UserDeleteStatus> userDeleteStatusMap = new ConcurrentHashMap<>();
-
+    @RabbitListener(queues = "followerDeletedUserQueue")
+    public void handleFollowerDeletedForUser(Long userId) {
+        logger.info("receive follower deleted");
+        UserDeleteStatus status = userDeleteStatusMap.getOrDefault(userId, new UserDeleteStatus());
+        status.setPostsDeleted(true);
+        userDeleteStatusMap.put(userId, status);
+        checkAndDeleteUser(userId);
+    }
     @RabbitListener(queues = "postDeletedUserQueue")
     public void handlePostsDeletedForUser(Long userId) {
         logger.info("receive post deleted");

@@ -4,10 +4,12 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/BlogSystem-Auth/BlogSystem-Auth.iml" filepath="$PROJECT_DIR$/BlogSystem-Auth/BlogSystem-Auth.iml" />
       <module fileurl="file://$PROJECT_DIR$/BlogSystem-Community/BlogSystem-Community.iml" filepath="$PROJECT_DIR$/BlogSystem-Community/BlogSystem-Community.iml" />
+      <module fileurl="file://$PROJECT_DIR$/BlogSystem-Follow/BlogSystem-Follow.iml" filepath="$PROJECT_DIR$/BlogSystem-Follow/BlogSystem-Follow.iml" />
       <module fileurl="file://$PROJECT_DIR$/BlogSystem-Gateway/BlogSystem-Gateway.iml" filepath="$PROJECT_DIR$/BlogSystem-Gateway/BlogSystem-Gateway.iml" />
       <module fileurl="file://$PROJECT_DIR$/BlogSystem-Message/BlogSystem-Message.iml" filepath="$PROJECT_DIR$/BlogSystem-Message/BlogSystem-Message.iml" />
       <module fileurl="file://$PROJECT_DIR$/BlogSystem-Post/BlogSystem-Post.iml" filepath="$PROJECT_DIR$/BlogSystem-Post/BlogSystem-Post.iml" />
       <module fileurl="file://$PROJECT_DIR$/BlogSystem-User/BlogSystem-User.iml" filepath="$PROJECT_DIR$/BlogSystem-User/BlogSystem-User.iml" />
+      <module fileurl="file://$PROJECT_DIR$/BlogSystem-UserBehaviour/BlogSystem-UserBehaviour.iml" filepath="$PROJECT_DIR$/BlogSystem-UserBehaviour/BlogSystem-UserBehaviour.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/Mercury Project.iml" filepath="$PROJECT_DIR$/.idea/Mercury Project.iml" />
       <module fileurl="file://$PROJECT_DIR$/eureka/eureka.iml" filepath="$PROJECT_DIR$/eureka/eureka.iml" />
     </modules>

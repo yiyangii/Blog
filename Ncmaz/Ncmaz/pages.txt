@@ -1,0 +1,63 @@
+import React from "react";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { Page } from "./types";
+import Footer from "components/Footer/Footer";
+import MusicPlayer from "components/MusicPlayer/MusicPlayer";
+import PageHome from "app/(home)/page";
+import PageArchive from "app/(archives)/archive/page";
+import PageArchiveVideo from "app/(archives)/archive-3/page";
+import PageArchiveAudio from "app/(archives)/archive-2/page";
+import PageAuthor from "app/author/page";
+import PageSingle from "app/(singles)/(default)/single/page";
+import PageSingleTemplate2 from "app/(singles)/(default)/single-2/page";
+import PageSingleTemplate3 from "app/(singles)/(has-sidebar)/single-3/page";
+import PageSingleGallery from "app/(singles)/(default)/single-gallery/page";
+import PageSingleAudio from "app/(singles)/(default)/single-audio/page";
+import PageSingleVideo from "app/(singles)/(default)/single-video/page";
+import PageSearch from "app/(search)/search/page";
+import PageSearchV2 from "app/(search)/search-2/page";
+import PageAbout from "app/about/page";
+import PageContact from "app/(others)/contact/page";
+import Page404 from "app/not-found";
+import PageLogin from "app/(others)/login/page";
+import PageSignUp from "app/(others)/signup/page";
+import PageForgotPass from "app/(others)/forgot-pass/page";
+import PageSubcription from "app/(others)/subscription/page";
+import PageHomeDemo2 from "app/(home)/home-2/page";
+import PageHomeDemo3 from "app/(home)/home-3/page";
+import PageHomeDemo4 from "app/(home)/home-4/page";
+import PageHomeDemo6 from "app/(home)/home-6/page";
+import SiteHeader from "app/SiteHeader";
+import PageSingleTemplate4 from "app/(singles)/(has-sidebar)/single-4/page";
+import DashboardSubmitPost from "app/(others)/dashboard/submit-post/page";
+import DashboardPosts from "app/(others)/dashboard/posts/page";
+import DashboardEditProfile from "app/(others)/dashboard/edit-profile/page";
+import DashboardSubcription from "app/(others)/dashboard/subscription/page";
+import DashboardBilingAddress from "app/(others)/dashboard/billing-address/page";
+
+export const pages: Page[] = [
+  { path: "/", component: PageHome },
+  { path: "/page404", component: Page404 },
+  { path: "/login", component: PageLogin },
+  { path: "/signup", component: PageSignUp },
+    { path: "/all-categories", component: AllCategoriesPage },  // Add this line
+
+];
+
+const MyRoutes = () => {
+  return (
+    <BrowserRouter>
+      <SiteHeader />
+
+      <Routes>
+        {pages.map(({ component: Component, path }, index) => {
+          return <Route key={index} element={<Component />} path={path} />;
+        })}
+        <Route element={<Page404 />} />
+      </Routes>
+
+    </BrowserRouter>
+  );
+};
+
+export default MyRoutes;

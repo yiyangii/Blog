@@ -41,7 +41,9 @@
         public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
             logger.info("Security Filter Chain is being configured");
 
-            http.csrf().disable()  // 禁用CSRF
+            http
+                    .cors().and()
+                    .csrf().disable()  // 禁用CSRF
                     .authorizeRequests()  // 权限配置
                     .requestMatchers("/api/auth/**").permitAll()  // 允许登录和注册不需要认证
                     .anyRequest().authenticated()  // 其他所有请求需要认证
@@ -54,7 +56,7 @@
         @Bean
         public CorsConfigurationSource corsConfigurationSource() {
             CorsConfiguration configuration = new CorsConfiguration();
-            configuration.addAllowedOrigin("http://localhost:8081"); // You should only set trusted site here. e.g. http://localhost:4200 means only this site can access.
+            configuration.addAllowedOrigin("http://localhost:3000");
             configuration.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE","HEAD","OPTIONS"));
             configuration.addAllowedHeader("*");
             configuration.setAllowCredentials(true);

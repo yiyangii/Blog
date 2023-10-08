@@ -68,6 +68,7 @@ public class PostService {
     }
     @Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED)
     public Post savePost(Post post) {
+        System.out.println(post);
         try {
             Set<PostCategory> postCategories = post.getPostCategories();
             if (postCategories != null) {
@@ -94,6 +95,16 @@ public class PostService {
             List<Image> images = post.getImages();
             if (images != null) {
                 post.getImages().forEach(img -> img.setPost(post));
+            }
+
+            Set<Comment> comments = post.getComments();
+            System.out.println("Number of comments: " + (comments != null ? comments.size() : "null"));
+
+            if (comments != null) {
+                comments.forEach(comment -> {
+                    comment.setPost(post);
+
+                });
             }
             Post savedPost = postRepository.save(post);
 
