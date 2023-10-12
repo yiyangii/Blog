@@ -16,7 +16,6 @@ public class GatewayConfig {
 
     @Bean
     public RouteLocator customRouteLocator(RouteLocatorBuilder routeLocatorBuilder) {
-
         return routeLocatorBuilder.routes()
                 .route("user_service", r -> r.path("/api/users/**")
                         .uri("lb://blog-system-User"))
@@ -24,8 +23,11 @@ public class GatewayConfig {
                         .uri("lb://blog-system-Message"))
                 .route("post_service", r -> r.path("/api/posts/**")
                         .uri("lb://blog-system-Post"))
+                .route("category_service", r -> r.path("/api/categories/**")
+                        .uri("lb://blog-system-Post"))
                 .route("community_service", r -> r.path("/api/community/**")
                         .uri("lb://blog-system-Community"))
                 .build();
     }
+
 }
