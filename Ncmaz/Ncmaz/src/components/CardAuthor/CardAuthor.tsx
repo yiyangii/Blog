@@ -9,7 +9,7 @@ export interface CardAuthorProps {
 }
 
 const CardAuthor: FC<CardAuthorProps> = ({ className = "", author }) => {
-  const { displayName, href = "/", avatar, jobName } = author;
+  const { username, href = "/", avatar, role } = author;
   return (
     <Link
       href={href}
@@ -20,18 +20,18 @@ const CardAuthor: FC<CardAuthorProps> = ({ className = "", author }) => {
         containerClassName="flex-shrink-0 mr-4"
         radius="rounded-full"
         imgUrl={avatar}
-        userName={displayName}
+        userName={username}
       />
       <div>
         <h2
           className={`text-sm sm:text-base text-neutral-900 dark:text-neutral-100 font-medium sm:font-semibold`}
         >
-          {displayName}
+          {username}
         </h2>
         <span
           className={`block mt-[2px] text-xs text-neutral-500 dark:text-neutral-400`}
         >
-          {jobName}
+          {role}
         </span>
       </div>
     </Link>

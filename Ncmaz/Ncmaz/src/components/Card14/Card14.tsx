@@ -66,10 +66,10 @@ const Card14: FC<Card14Props> = ({
               containerClassName="ring-2 ring-white"
               sizeClass="h-7 w-7 text-sm"
               imgUrl={author.avatar}
-              userName={author.displayName}
+              userName={author.username}
             />
             <span className="block text-white truncate">
-              {author.displayName}
+              {author.username}
             </span>
           </Link>
           <>

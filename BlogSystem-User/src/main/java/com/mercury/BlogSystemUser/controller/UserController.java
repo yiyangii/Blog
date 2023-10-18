@@ -58,6 +58,7 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<User> registerUser(@RequestBody User user) {
         try {
+
             User savedUser = userService.saveUserWithRoles(user);
             return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
         } catch (Exception e) {

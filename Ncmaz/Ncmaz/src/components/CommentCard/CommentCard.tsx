@@ -171,7 +171,7 @@ const CommentCard: FC<CommentCardProps> = ({
               className="flex-shrink-0 font-semibold text-neutral-800 dark:text-neutral-100"
               href={AUTHOR.href}
             >
-              {AUTHOR.displayName}
+              {AUTHOR.username}
             </Link>
             <span className="mx-2">·</span>
             <span className="text-neutral-500 dark:text-neutral-400 text-xs line-clamp-1 sm:text-sm">

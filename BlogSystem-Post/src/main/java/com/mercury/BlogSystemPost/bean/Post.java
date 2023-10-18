@@ -24,17 +24,30 @@ public class Post implements Serializable {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "blog_post_id_seq")
     @SequenceGenerator(name = "blog_post_id_seq", sequenceName = "post_service.blog_post_id_seq", allocationSize = 1)
     private int id;
-
+    @Column(name = "title")
     private String title;
+    @Column(name = "content")
     private String content;
+    @Column(name = "featuredimage")
+    private String featuredImage;
+    @Column(name = "route")
+    private String Route;
+
+    @Column(name = "commentcount")
+    private int commentCount;
+    @Column(name = "viewedcount")
+    private int viewdCount;
+    @Column(name = "readingtime")
+    private int readingTime;
+
+
     @Column(name = "author_id")
     private int authorId;
-    @Column(name = "updated_at")
+
     private Date updatedAt;
+
     @Column(name = "created_at", updatable = false)
     private Date createdAt = new Date(System.currentTimeMillis());
-    @Column(name = "visibility")
-    private String visibility;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Image> images = new ArrayList<>();
@@ -47,8 +60,5 @@ public class Post implements Serializable {
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Comment> comments = new HashSet<>();
-
-
-
-
 }
+

@@ -25,27 +25,35 @@ public class User implements Serializable {
     @Column(unique = true, nullable = false)
     private String email;
 
-    @Column(nullable = false)
+
     private String password;
 
     private String bio;
 
+    @Column(name = "avatar")
+    private String avatar;
+
+    @Column(name = "bg_image")
+    private String bgImage;
+
     @Column(name = "registration_date")
     private Date registrationDate;
 
+    private int count;
 
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<UserRole> userRoles = new HashSet<>();
 
-
-    public User(int id, String username, String email, String password, String bio, Date registrationDate) {
+    public User(long id, String username, String email, String password, String bio, Date registrationDate, String avatar, String bgImage) {
         this.id = id;
         this.username = username;
         this.email = email;
         this.password = password;
         this.bio = bio;
-        this.registrationDate = new Date(System.currentTimeMillis());
+        this.registrationDate = registrationDate;
+        this.avatar = avatar;
+        this.bgImage = bgImage;
     }
 
     public User() {

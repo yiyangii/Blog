@@ -38,10 +38,10 @@ const ModalHideAuthor: FC<ModalHideAuthorProps> = ({
     return (
       <form action="#">
         <h3 className="text-lg font-semibold">
-          Hide stories from {auhthor.displayName}
+          Hide stories from {auhthor.username}
         </h3>
         <span className="text-sm">
-          We will hide all articles from <strong>{auhthor.displayName}</strong>.
+          We will hide all articles from <strong>{auhthor.username}</strong>.
           You will no longer see their articles?
         </span>
         <div className="mt-4 space-x-3">

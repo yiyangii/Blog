@@ -35,7 +35,7 @@ const Card9: FC<Card9Props> = ({
           </h2>
           <Link href={author.href} className="flex mt-2.5 relative">
             <span className="block text-neutral-200 hover:text-white font-medium truncate">
-              {author.displayName}
+              {author.username}
             </span>
             <span className="mx-[6px] font-medium">·</span>
             <span className="font-normal truncate">{date}</span>

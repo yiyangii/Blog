@@ -21,42 +21,42 @@ export interface TaxonomyType {
 
 export interface PostAuthorType {
   id: string | number;
-  firstName: string;
-  lastName: string;
-  displayName: string;
+  username: string;
   avatar: string;
   bgImage?: string;
   email?: string;
   count: number;
-  desc: string;
-  jobName: string;
+  bio: string;
+  role: string;
   href: Route;
 }
 
 export interface PostDataType {
   id: string | number;
   author: PostAuthorType;
+  authorId?: number;
   date: string;
   href: Route;
   categories: TaxonomyType[];
   title: string;
   featuredImage: string;
   desc?: string;
-  like: {
+  like?: {
     count: number;
     isLiked: boolean;
   };
-  bookmark: {
+  bookmark?: {
     count: number;
     isBookmarked: boolean;
   };
   commentCount: number;
   viewdCount: number;
   readingTime: number;
-  postType: "standard" | "video" | "gallery" | "audio";
+  postType?: "standard" | "video" | "gallery" | "audio";
   videoUrl?: string;
   audioUrl?: string | string[];
   galleryImgs?: string[];
+  content?:string;
 }
 
 export type TwMainColor =

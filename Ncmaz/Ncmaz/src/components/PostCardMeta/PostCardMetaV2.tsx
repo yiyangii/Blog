@@ -29,7 +29,7 @@ const PostCardMetaV2: FC<PostCardMetaV2Props> = ({
             radius="rounded-full"
             sizeClass={avatarSize}
             imgUrl={author.avatar}
-            userName={author.displayName}
+            userName={author.username}
           />
         )}
         <div>
@@ -41,7 +41,7 @@ const PostCardMetaV2: FC<PostCardMetaV2Props> = ({
 
           <Link href={author.href} className="flex mt-1.5">
             <span className="block text-neutral-700 hover:text-black dark:text-neutral-300 dark:hover:text-white font-medium">
-              {author.displayName}
+              {author.username}
             </span>
             <span className="text-neutral-500 dark:text-neutral-400 mx-[6px] font-medium">
               ·

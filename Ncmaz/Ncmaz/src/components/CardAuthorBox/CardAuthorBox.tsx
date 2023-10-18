@@ -10,7 +10,7 @@ export interface CardAuthorBoxProps {
 }
 
 const CardAuthorBox: FC<CardAuthorBoxProps> = ({ className = "", author }) => {
-  const { displayName, href = "/", avatar, jobName, count } = author;
+  const { username, href = "/", avatar, role, count } = author;
   return (
     <Link
       href={href}
@@ -20,16 +20,16 @@ const CardAuthorBox: FC<CardAuthorBoxProps> = ({ className = "", author }) => {
         sizeClass="w-20 h-20 text-2xl"
         radius="rounded-full"
         imgUrl={avatar}
-        userName={displayName}
+        userName={username}
       />
       <div className="mt-3">
         <h2 className={`text-sm sm:text-base font-medium`}>
-          <span className="line-clamp-1">{displayName}</span>
+          <span className="line-clamp-1">{username}</span>
         </h2>
         <span
           className={`block mt-1 text-sm text-neutral-500 dark:text-neutral-400`}
         >
-          @{jobName}
+          @{role}
         </span>
       </div>
       <div className="py-2 px-4 mt-4 bg-neutral-100 dark:bg-neutral-800 rounded-full flex items-center justify-center leading-none text-xs font-medium">

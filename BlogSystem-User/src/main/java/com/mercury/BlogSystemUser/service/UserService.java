@@ -93,6 +93,8 @@ public class UserService {
     @Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED)
     public User saveUserWithRoles(User user) {
         try {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+
             user.setRegistrationDate(new Date(System.currentTimeMillis()));
             Set<UserRole> userRoles = user.getUserRoles();
             userRoles.forEach((userRole)->{

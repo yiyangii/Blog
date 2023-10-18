@@ -37,13 +37,13 @@ const PostMeta2: FC<PostMeta2Props> = ({
               : "h-10 w-10 sm:h-11 sm:w-11 text-xl"
           }
           imgUrl={author.avatar}
-          userName={author.displayName}
+          userName={author.username}
         />
       </Link>
       <div className="ml-3">
         <div className="flex items-center">
           <Link href={author.href} className="block font-semibold">
-            {author.displayName}
+            {author.username}
           </Link>
 
           {!hiddenCategories && (
