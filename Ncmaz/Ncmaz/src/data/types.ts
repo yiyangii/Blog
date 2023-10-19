@@ -34,7 +34,7 @@ export interface PostAuthorType {
 export interface PostDataType {
   id: string | number;
   author: PostAuthorType;
-  authorId?: number;
+  authorId: number;
   date: string;
   href: Route;
   categories: TaxonomyType[];

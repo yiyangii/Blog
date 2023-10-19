@@ -1,18 +1,16 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 
 import SectionSliderNewCategories from "components/SectionSliderNewCategories/SectionSliderNewCategories";
 import SectionAds from "components/Sections/SectionAds";
 
-import {useDispatch, useSelector} from "react-redux";
-import {fetchCategories} from "../../slices/categorySlice";
-import {RootState,AppDispatch} from "../../store";
-import {fetchPostById} from "../../slices/postSlice";
-import {fetchUserById} from "../../slices/userSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchCategories } from "../../slices/categorySlice";
+import { RootState, AppDispatch } from "../../store";
+import { fetchAllPosts } from "../../slices/postSlice";  // 注意修改这里
+import { fetchUserById } from "../../slices/userSlice";
 import SectionMagazine2 from "components/Sections/SectionMagazine2";
-import {PostDataType} from "../../data/types";
-
-
-
+import { PostDataType } from "../../data/types";
+import Card2 from "components/Card2/Card2";
 
 const PageHome = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -20,13 +18,10 @@ const PageHome = () => {
     const taxonomyList = useSelector((state: RootState) => state.categories.categories);
     const categoryStatus = useSelector((state: RootState) => state.categories.status);
 
-    const postIdToFetch = 174; // This can be replaced with any ID
-    const postFromRedux = useSelector((state: RootState) => state.post.post);
-    const [localPost, setLocalPost] = useState(postFromRedux);
+    const postsFromRedux = useSelector((state: RootState) => state.post.posts);
+    const usersFromRedux = useSelector((state: RootState) => state.user.users);
+    const [localPosts, setLocalPosts] = useState<PostDataType[]>([]);
     const postStatus = useSelector((state: RootState) => state.post.status);
-
-    const user = useSelector((state: RootState) => state.user.users[postFromRedux?.authorId || -1]);
-    const userStatus = useSelector((state: RootState) => state.user.status);
 
     useEffect(() => {
         if (categoryStatus === 'idle') {
@@ -34,85 +29,74 @@ const PageHome = () => {
         }
 
         if (postStatus === 'idle') {
-            dispatch(fetchPostById(postIdToFetch));
+            dispatch(fetchAllPosts());
         }
     }, [categoryStatus, postStatus, dispatch]);
 
     useEffect(() => {
-        if (postStatus === 'succeeded' && postFromRedux && !user) {
-            dispatch(fetchUserById(postFromRedux.authorId as number));
-        }
-
-        if (userStatus === 'succeeded' && postFromRedux && user) {
-            const updatedPost = {
-                ...postFromRedux,
-                author: {
-                    id: user.id,
-                    username: user.username,
-                    avatar: user.avatar || "",
-                    count: user.count,
-                    bio: user.bio,
-                    role: "aa", // Check if userRoles exists
-                    href: `/user/${user.id}` // Assuming each user has their own page
+        if (postStatus === 'succeeded' && postsFromRedux.length > 0) {
+            // Fetch missing users based on posts' authorId
+            postsFromRedux.forEach(post => {
+                if (!usersFromRedux[post.authorId]) {
+                    dispatch(fetchUserById(post.authorId));
                 }
-            };
-            setLocalPost(updatedPost);
+            });
         }
-    }, [userStatus, postFromRedux, user, dispatch]);
+    }, [postStatus, postsFromRedux, usersFromRedux, dispatch]);
 
-    console.log(postFromRedux);
-
-
-
-
-
-
+    useEffect(() => {
+        if (postStatus === 'succeeded' && postsFromRedux.length > 0) {
+            const updatedPosts = postsFromRedux.map(post => {
+                const relatedUser = usersFromRedux[post.authorId];
+                if (relatedUser) {
+                    return {
+                        ...post,
+                        author: {
+                            id: relatedUser.id,
+                            username: relatedUser.username,
+                            avatar: relatedUser.avatar || "",
+                            count: relatedUser.count,
+                            bio: relatedUser.bio,
+                            role: "aa",
+                            href: `/user/${relatedUser.id}`
+                        }
+                    };
+                }
+                return post;
+            });
+            setLocalPosts(updatedPosts);
+        }
+    }, [postStatus, postsFromRedux, usersFromRedux]);
     return (
-      <div className="nc-PageHome relative">
-        <div className="container relative">
+        <div className="nc-PageHome relative">
+            <div className="container relative">
+                <div className="mb-8">
+                    <SectionSliderNewCategories
+                        heading="Top trending Categories"
+                        subHeading=""
+                        categories={taxonomyList}
+                        categoryCardType="card1"
+                        viewAllLink="/all-categories"
+                    />
+                </div>
 
-          <div className="mb-8">
-            <SectionSliderNewCategories
-                heading="Top trending Categories"
-                subHeading=""
-                categories={taxonomyList}
-                categoryCardType="card1"
-                viewAllLink="/all-categories"
-            />
-          </div>
+                {/* Use Card2 directly here */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {localPosts.map((post, index) => (
+                        <Card2 key={index} size="normal" post={post} />
 
+                    ))}
+                </div>
 
-          <div className="grid grid-cols-3 gap-4">
-            <SectionMagazine2
-                className="py-16 lg:py-24"
-                heading="Posts"
-                posts={[localPost  as PostDataType]}
-            />
-          </div>
-          {/* Displaying the fetched post*/}
-          {/*{postStatus === 'succeeded' && post && (*/}
-          {/*    <div className="grid grid-cols-3 gap-4">*/}
-          {/*      <SectionMagazine2*/}
-          {/*          className="py-16 lg:py-24"*/}
-          {/*          heading="Posts"*/}
-          {/*          posts={[post]}*/}
-          {/*      />*/}
-          {/*    </div>*/}
-          {/*)}*/}
-          {/*/!* ... rest of your component ... *!/*/}
-
-          <SectionAds />
-          <button
-              className="fixed bottom-4 right-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-              // onClick={fetchRandomPost}
-          >
-            Refresh Posts
-          </button>
+                <SectionAds />
+                <button
+                    className="fixed bottom-4 right-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                >
+                    Refresh Posts
+                </button>
+            </div>
         </div>
-      </div>
-  );
+    );
 };
 
 export default PageHome;
-
-
