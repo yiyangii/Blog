@@ -3,29 +3,33 @@ import { Route } from "routers/types";
 import Link from "components/Link";
 import React, { ReactNode } from "react";
 import usePathname from "hooks/usePathname";
+import {dispatch} from "jest-circus/build/state";
+import {clearCurrentUser} from "../../../slices/userSlice";
+import {useDispatch} from "react-redux";
+import {useNavigate} from "react-router-dom";
 
 const subPages: { href: Route; pageName: string; emoij: string }[] = [
-  {
-    href: "/dashboard",
-    emoij: "⏳",
-    pageName: "Dash board",
-  },
+  // {
+  //   href: "/dashboard",
+  //   emoij: "⏳",
+  //   pageName: "Dash board",
+  // },
   {
     href: "/dashboard/posts",
 
     emoij: "📕",
     pageName: "Posts",
   },
+  // {
+  //   href: "/dashboard/edit-profile",
+  //
+  //   emoij: "🛠",
+  //   pageName: "Edit profile",
+  // },
   {
-    href: "/dashboard/edit-profile",
-
-    emoij: "🛠",
-    pageName: "Edit profile",
-  },
-  {
-    href: "/dashboard/subscription",
-    emoij: "📃",
-    pageName: "Subscription",
+    href: "/dashboard/follower",
+    emoij: "🤳",
+    pageName: "Follower",
   },
   {
     href: "/dashboard/billing-address",
@@ -42,6 +46,12 @@ const subPages: { href: Route; pageName: string; emoij: string }[] = [
 ];
 
 const Layout = ({ children }: { children: ReactNode }) => {
+  const dispatch = useDispatch();
+  const history = useNavigate();
+  const handleSignOut = () => {
+    dispatch(clearCurrentUser());
+    history('/login');
+  };
   const pathname = usePathname();
 
   return (
@@ -49,8 +59,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
       <header className="text-center max-w-2xl mx-auto - mb-14 sm:mb-16 lg:mb-24">
         <Heading2 emoji="">Dash board</Heading2>
         <span className="block text-sm mt-2 text-neutral-700 sm:text-base dark:text-neutral-200">
-          View your dashboard, manage your posts, subscription and edit and
-          profile.
+
         </span>
       </header>
 
@@ -79,11 +88,12 @@ const Layout = ({ children }: { children: ReactNode }) => {
 
             <li className=" border-t border-neutral-200 dark:border-neutral-700" />
             <li>
-              <Link
+              <Link onClick={handleSignOut}
                 className={`flex items-center px-6 py-3 font-medium text-red-500`}
+
                 href={"/"}
               >
-                <span className="w-8 mr-2 text-lg">💡</span>
+                <span  className="w-8 mr-2 text-lg">💡</span>
                 Sign out
               </Link>
             </li>

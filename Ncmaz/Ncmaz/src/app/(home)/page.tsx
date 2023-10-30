@@ -14,7 +14,6 @@ import Card2 from "components/Card2/Card2";
 
 const PageHome = () => {
     const dispatch = useDispatch<AppDispatch>();
-
     const taxonomyList = useSelector((state: RootState) => state.categories.categories);
     const categoryStatus = useSelector((state: RootState) => state.categories.status);
 
@@ -22,7 +21,9 @@ const PageHome = () => {
     const usersFromRedux = useSelector((state: RootState) => state.user.users);
     const [localPosts, setLocalPosts] = useState<PostDataType[]>([]);
     const postStatus = useSelector((state: RootState) => state.post.status);
+    const currentUser = useSelector((state: RootState) => state.user.currentUser);
 
+    console.log(currentUser);
     useEffect(() => {
         if (categoryStatus === 'idle') {
             dispatch(fetchCategories());

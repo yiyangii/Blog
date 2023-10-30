@@ -30,9 +30,9 @@ public class CategoryService {
     }
 
 
-    public void updateCategoryCount(Long id, int count) {
-        Category category = getCategoryById(id).orElseThrow(() -> new RuntimeException("Category not found"));
-        category.setCount(count);
-        categoryRepository.save(category);
-    }
+//    public void updateCategoryCount(Long id, int count) {
+//        Category category = getCategoryById(id).orElseThrow(() -> new RuntimeException("Category not found"));
+//        category.setCount(count);
+//        categoryRepository.save(category);
+//    }
 }

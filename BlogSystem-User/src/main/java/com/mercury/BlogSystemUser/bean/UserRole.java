@@ -11,6 +11,7 @@ import java.io.Serializable;
 @Table(name = "user_role", schema = "user_service")
 @NoArgsConstructor
 @ToString
+//Add to toString()
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class UserRole implements Serializable {
 

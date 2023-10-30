@@ -18,6 +18,15 @@ export interface TaxonomyType {
   color?: TwMainColor | string;
   taxonomy: "category" | "tag";
 }
+export interface UserPostType {
+  id: number;
+  title: string;
+  image: string;
+  commentCount: number;
+  likeCount: number;
+};
+
+
 
 export interface PostAuthorType {
   id: string | number;

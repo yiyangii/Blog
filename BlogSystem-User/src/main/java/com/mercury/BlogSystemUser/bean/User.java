@@ -3,6 +3,7 @@ package com.mercury.BlogSystemUser.bean;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 
 import java.io.Serializable;
 import java.sql.Date;
@@ -11,6 +12,7 @@ import java.util.Set;
 
 @Data
 @Entity
+@ToString(exclude = "userRoles") // 排除userRoles以避免无限递归\
 @Table(name = "users", schema = "user_service")
 public class User implements Serializable {
 

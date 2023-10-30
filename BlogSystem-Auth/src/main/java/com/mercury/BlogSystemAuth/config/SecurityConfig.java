@@ -43,12 +43,12 @@
 
             http
                     .cors().and()
-                    .csrf().disable()  // 禁用CSRF
-                    .authorizeRequests()  // 权限配置
-                    .requestMatchers("/api/auth/**").permitAll()  // 允许登录和注册不需要认证
-                    .anyRequest().authenticated()  // 其他所有请求需要认证
+                    .csrf().disable()
+                    .authorizeRequests()
+                    .requestMatchers("/api/auth/**").permitAll()
+                    .anyRequest().authenticated()
                     .and()
-                    .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class).httpBasic();;  // 添加JWT过滤器
+                    .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class).httpBasic();;
 
             return http.build();
         }
@@ -71,7 +71,7 @@
         }
 
 
-        @Autowired // @Autowired on function will autowired the parameters
+        @Autowired
         public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
             auth
                     .userDetailsService(userDetailServiceImpl)

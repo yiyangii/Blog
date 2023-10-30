@@ -42,16 +42,11 @@ public class PostController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Post> updatePost(@PathVariable int id, @RequestBody Post post) {
-
         if(post.getId() != id) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-
-
         try {
-
             Post updatedPost = postService.updatePost(post);
-
             return new ResponseEntity<>(updatedPost, HttpStatus.OK);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

@@ -1,4 +1,3 @@
-// PageLogin.tsx
 import React from 'react';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
@@ -7,41 +6,59 @@ import ButtonPrimary from 'components/Button/ButtonPrimary';
 import NcLink from 'components/NcLink/NcLink';
 import Heading2 from 'components/Heading/Heading2';
 import Layout from '../layout';
-import {loginFailure, loginStart, loginSuccess} from "../../../slices/authSlice";
-import {RootState} from "../../../store";
+import { loginFailure, loginStart, loginSuccess } from "../../../slices/authSlice";
+import {fetchUserById, fetchUserByUsernameAndPassword} from "../../../slices/userSlice";
+import {AppDispatch, RootState} from "../../../store";
+import { useNavigate } from 'react-router-dom';
 
 const PageLogin = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const authState = useSelector((state: RootState) => state.auth);
-
+  const navigate = useNavigate();
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const email = e.currentTarget.email.value;
+    const username = e.currentTarget.username.value;
     const password = e.currentTarget.password.value;
 
+
     dispatch(loginStart());
+
     try {
       const response = await axios.post('http://localhost:8081/api/auth/login', {
-        email,
+        username,
         password,
       });
 
       if (response.data && response.data.token) {
-        localStorage.setItem("authToken", response.data.token);
+        const authToken = response.data.token;
+        localStorage.setItem("authToken", authToken);
 
-        dispatch(loginSuccess(response.data.token));
+        // Use the JWT to get the user details by username from the other endpoint (8085)
+        const userResponse = await axios.get(`http://localhost:8085/api/users/username/${username}`, {
+          headers: {
+            'Authorization': `Bearer ${authToken}`
+          }
+        });
+
+        if (userResponse.data && userResponse.data.id) {
+          // Fetch and store user details after successful login
+          dispatch(fetchUserByUsernameAndPassword({ username, password }));
+
+        }
+
+        dispatch(loginSuccess(authToken));
+        navigate('/');
       } else {
         dispatch(loginFailure('Invalid login details'));
       }
     } catch (error: unknown) {
-    if (error instanceof Error) {
-      dispatch(loginFailure(error.message));
-    } else {
-      dispatch(loginFailure("An unknown error occurred."));
+      if (error instanceof Error) {
+        dispatch(loginFailure(error.message));
+      } else {
+        dispatch(loginFailure("An unknown error occurred."));
+      }
     }
-  }
-
-};
+  };
 
   return (
       <Layout>
@@ -55,8 +72,8 @@ const PageLogin = () => {
         <div className="max-w-md mx-auto space-y-6">
           <form className="grid grid-cols-1 gap-6" onSubmit={handleSubmit}>
             <label className="block">
-              <span className="text-neutral-800 dark:text-neutral-200">Email address</span>
-              <Input type="username" name="email" placeholder="example@example.com" className="mt-1" />
+              <span className="text-neutral-800 dark:text-neutral-200">Username</span>
+              <Input type="text" name="username" placeholder="your_username" className="mt-1" />
             </label>
             <label className="block">
             <span className="flex justify-between items-center text-neutral-800 dark:text-neutral-200">

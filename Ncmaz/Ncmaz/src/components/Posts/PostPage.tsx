@@ -12,18 +12,18 @@ import { PostAuthorType, PostDataType } from "../../data/types";
 const PostPage: React.FC = () => {
     const { id } = useParams();
     const dispatch: AppDispatch = useDispatch();
-    const post = useSelector((state: any) => state.post.post);
-    const postStatus = useSelector((state: any) => state.post.status);
-
-    const [currentImageIndex, setCurrentImageIndex] = useState(0);
-    const [localPost, setLocalPost] = useState<PostDataType | null>(null);
-
+    const post = useSelector((state: RootState) => state.post.post);
     const usersFromRedux = useSelector((state: RootState) => state.user.users);
 
+    const [localPost, setLocalPost] = useState<PostDataType | null>(null);
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
     useEffect(() => {
-        if (!post || postStatus === 'idle' || (post && post.id !== Number(id))) {
-            dispatch(fetchPostById(Number(id)));
-        } else if (postStatus === 'succeeded' && post) {
+        dispatch(fetchPostById(Number(id)));
+    }, [id, dispatch]);
+
+    useEffect(() => {
+        if (post) {
             const relatedUser = usersFromRedux[post.authorId];
             if (relatedUser) {
                 const updatedPost = {
@@ -41,7 +41,7 @@ const PostPage: React.FC = () => {
                 setLocalPost(updatedPost);
             }
         }
-    }, [id, dispatch, postStatus, post, usersFromRedux]);
+    }, [post, usersFromRedux]);
 
     const handlePreviousImage = () => {
         setCurrentImageIndex((prevIndex) => prevIndex === 0 ? (localPost?.galleryImgs?.length || 0) - 1 : prevIndex - 1);
@@ -51,7 +51,7 @@ const PostPage: React.FC = () => {
         setCurrentImageIndex((prevIndex) => (prevIndex + 1) % (localPost?.galleryImgs?.length || 0));
     };
 
-
+    console.log("local"  + localPost);
     if (!localPost || !localPost.galleryImgs || localPost.galleryImgs.length === 0) {
         return <div>Loading...</div>;
     }

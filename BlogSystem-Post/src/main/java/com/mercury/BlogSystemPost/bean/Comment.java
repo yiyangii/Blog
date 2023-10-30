@@ -17,7 +17,7 @@ import java.sql.Date;
 public class Comment implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @EqualsAndHashCode.Include  // 明确包含这个字段
+    @EqualsAndHashCode.Include
     private Long id;
 
     private String content;
@@ -29,7 +29,7 @@ public class Comment implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "post_id", nullable = false)
     @JsonIgnore
-    @EqualsAndHashCode.Exclude  // 明确排除这个字段
+    @EqualsAndHashCode.Exclude
     private Post post;
 }
 

@@ -134,7 +134,7 @@ public class UserListener {
 
     @RabbitListener(queues = UserRabbitMQConfig.LISTENER_QUEUE_USER_DETAIL)
     public UserDetails buildUserDetails(String userName) {
-        Logger logger = LoggerFactory.getLogger(getClass()); // 初始化日志对象
+        Logger logger = LoggerFactory.getLogger(getClass());
         try {
             if (userName == null || userName.trim().isEmpty()) {
                 logger.error("Received empty or null username");
@@ -150,7 +150,7 @@ public class UserListener {
             List<UserRole> roles = userRoleRepository.findRolesByUser(user);
             List<Role> actualRoles = new ArrayList<>();
             for (UserRole userRole : roles) {
-                Role role = roleRepository.findById(userRole.getRole().getId()).orElse(null); // 假设getRoleId()返回Role的ID
+                Role role = roleRepository.findById(userRole.getRole().getId()).orElse(null);
                 if (role != null) {
                     actualRoles.add(role);
                 }

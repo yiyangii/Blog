@@ -1,3 +1,5 @@
+package com.mercury.BlogSystemMessage.controller;
+
 import com.mercury.BlogSystemMessage.bean.BlogDirectMessage;
 import com.mercury.BlogSystemMessage.service.MessageService;
 import org.slf4j.Logger;

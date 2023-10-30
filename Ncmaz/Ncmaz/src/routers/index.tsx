@@ -13,15 +13,28 @@ import AllCategoriesPage from "../components/Categories/AllCategoriesPage";
 import PostPage from "../components/Posts/PostPage";
 import { Provider } from 'react-redux';
 import store from "../store";
+import DashboardEditProfile from "../app/(others)/dashboard/edit-profile/page";
+import DashboardSubmitPost from "../app/(others)/dashboard/submit-post/page";
+import DashboardPosts from "../app/(others)/dashboard/posts/page";
+import DashboardSubcription from "../app/(others)/dashboard/subscription/page";
+import FollowerComponent from "../app/(others)/dashboard/FollowerComponent";
+import UserDashboard from "../app/(others)/dashboard/subscription/page";
+import DashboardEditPost from "../app/(others)/dashboard/edit-profile/DashboardEditPost";
 
 
 export const pages: Page[] = [
-  { path: "/", component: PageHome },
-  { path: "/page404", component: Page404 },
-  { path: "/login", component: PageLogin },
-  { path: "/signup", component: PageSignUp },
-     { path: "/all-categories", component: AllCategoriesPage },
-    {path : "/post/:id",component : PostPage}
+    { path: "/", component: PageHome },
+    { path: "/page404", component: Page404 },
+    { path: "/login", component: PageLogin },
+    { path: "/signup", component: PageSignUp },
+    { path: "/all-categories", component: AllCategoriesPage },
+    { path : "/post/:id",component : PostPage},
+    { path: "/user/:id", component: DashboardEditProfile},
+    { path: "/dashboard/submit-post",component : DashboardSubmitPost},
+    { path: "/dashboard/posts",component : DashboardPosts},
+    { path: "/dashboard/follower",component:UserDashboard},
+    { path: "/post-edit/:id",component:DashboardEditPost}
+
 
 ];
 const MyRoutes = () => {

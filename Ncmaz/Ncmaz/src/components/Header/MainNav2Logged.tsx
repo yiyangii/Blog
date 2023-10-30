@@ -5,12 +5,19 @@ import AvatarDropdown from "./AvatarDropdown";
 import Navigation from "components/Navigation/Navigation";
 import SearchModal from "./SearchModal";
 import NotifyDropdown from "./NotifyDropdown";
+import {useSelector} from "react-redux";
+import {RootState} from "../../store";
+import LoginButton from "../../app/(others)/dashboard/LoginButton";
 
 export interface MainNav2LoggedProps {}
 
 const MainNav2Logged: FC<MainNav2LoggedProps> = () => {
-  const renderContent = () => {
+    const currentUser = useSelector((state: RootState) => state.user.currentUser);
+
+    const renderContent = () => {
+
     return (
+
       <div className="h-20 flex justify-between">
         {/*<div className="flex items-center lg:hidden flex-1">*/}
         {/*  <MenuBar />*/}
@@ -25,9 +32,16 @@ const MainNav2Logged: FC<MainNav2LoggedProps> = () => {
         </div>
 
         <div className="flex-1 flex items-center justify-end text-slate-700 dark:text-slate-100">
-          <SearchModal />
-          <NotifyDropdown />
-          <AvatarDropdown />
+            <SearchModal />
+            {currentUser ? (
+                <>
+                    <NotifyDropdown />
+                    <AvatarDropdown />
+                </>
+            ) : <LoginButton />}
+
+
+
         </div>
       </div>
     );

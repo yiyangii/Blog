@@ -33,20 +33,16 @@ public class MessageService {
     }
 
     public BlogConversation getOrCreateConversation(BlogConversation c) {
-        // Check if a conversation already exists between the two users
         BlogConversation conversation = blogConversationDao.findByUser1IdAndUser2Id(c.getUser1Id(), c.getUser2Id());
 
         if (conversation == null) {
-            // Create a new conversation
             conversation = new BlogConversation();
             conversation.setUser1Id(c.getUser1Id());
             conversation.setUser2Id(c.getUser2Id());
 
-            // Save the conversation to generate its ID
             conversation = blogConversationDao.save(conversation);
         }
 
-        // If messages are provided, associate them with the conversation and save
         List<BlogDirectMessage> messages = c.getMessages();
         if (messages != null && !messages.isEmpty()) {
             for (BlogDirectMessage message : messages) {

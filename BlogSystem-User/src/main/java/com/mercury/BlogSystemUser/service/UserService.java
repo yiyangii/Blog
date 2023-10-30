@@ -108,6 +108,14 @@ public class UserService {
             throw new RuntimeException("Error while saving the user and roles", e);
         }
     }
+    public Optional<User> getUserByUsername(String username) {
+        Optional<User> user = userRepository.findByUsername(username);
+        if(user.isPresent()){
+            //Send Query notification to Queue : queue.user.query
+            rabbitTemplate.convertAndSend(UserRabbitMQConfig.EXCHANGE_USER,UserRabbitMQConfig.ROUTING_KEY_USER_QUERIED,user.get().getId());
+        }
+        return user;
+    }
 
 
 

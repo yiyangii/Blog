@@ -25,22 +25,21 @@ public class FollowService {
         return followerRepository.save(blogUserFollower);
     }
 
-    // Read (by ID)
+
     public Optional<BlogUserFollower> getFollowById(Integer id) {
         return followerRepository.findById(Long.valueOf(id));
     }
 
-    // Read (All)
+
     public List<BlogUserFollower> getAllFollows() {
         return followerRepository.findAll();
     }
 
-    // Update
+
     public BlogUserFollower updateFollow(BlogUserFollower blogUserFollower) {
         return followerRepository.save(blogUserFollower);
     }
 
-    // Delete
     public void deleteFollow(Integer id) {
         followerRepository.deleteById(Long.valueOf(id));
     }
@@ -49,27 +48,19 @@ public class FollowService {
     @RabbitListener(queues = "queue.user.delete.request.follower")
     public void deleteUserFollowers(Long userId) {
         try {
-            // Parse the message to get the user ID (assuming the message is in the form of a string representing the user ID)
-
 
             List<BlogUserFollower> followerList = followerRepository.findByFollowerId(Math.toIntExact(userId));
 
             List<BlogUserFollower> followedList = followerRepository.findByFollowedId(Math.toIntExact(userId));
 
-            // Delete followers one by one
             for (BlogUserFollower follower : followerList) {
 
                 followerRepository.deleteById(Long.valueOf(follower.getId()));
             }
 
-            // Delete followed one by one
             for (BlogUserFollower followed : followedList) {
                 followerRepository.deleteById(Long.valueOf(followed.getId()));
             }
-
-
-
-            // Send a message to "followerDeletedUserQueue" to confirm the operation
             rabbitTemplate.convertAndSend("followerDeletedUserQueue",Long.valueOf(userId));
         } catch (NumberFormatException e) {
             System.out.println("Error parsing user ID: " + e.getMessage());

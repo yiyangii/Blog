@@ -48,12 +48,7 @@ public class AuthController {
     public ResponseEntity<Boolean> validateToken(@RequestBody String token) {
         try {
             System.out.println(token);
-            // Here, you should also load UserDetails using the username obtained from the token
-            // This is necessary for the validateToken() function
-            // UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-            // As this is a simplified example, we skip loading UserDetails
-            // And assume username is directly embedded in the token as the subject
             String username = jwtUtil.getUsernameFromToken(token);
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
