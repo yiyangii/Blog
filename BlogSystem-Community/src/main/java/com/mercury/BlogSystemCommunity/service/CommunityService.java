@@ -12,6 +12,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,13 +40,14 @@ public class CommunityService {
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
-    // 创建新社群
+    public List<BlogCommunity> getAllCommunities() {
+        return blogCommunityRepository.findAll();
+    }
     public BlogCommunity createCommunity(BlogCommunity blogCommunity) {
 
 
         BlogCommunity savedCommunity = blogCommunityRepository.save(blogCommunity);
         Long generatedId = savedCommunity.getId();
-
 
         Map<String, Object> newCommunityMessage = new HashMap<>();
         newCommunityMessage.put("type", "NEW_COMMUNITY");
@@ -197,6 +201,15 @@ public class CommunityService {
             logger.error("Error while processing delete request for post ID: {}", postId, e);
         }
     }
+
+    public List<BlogCommunity> getTopCommunities() {
+        Pageable topFive = PageRequest.of(0, 5);
+        Page<BlogCommunity> page = blogCommunityRepository.findTopCommunities(topFive);
+        return page.getContent();
+    }
+
+
+
 }
 
 

@@ -5,6 +5,10 @@ import com.mercury.BlogSystemPost.bean.Tag;
 import com.mercury.BlogSystemPost.dao.PostTagRepository;
 import com.mercury.BlogSystemPost.dao.TagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,5 +53,11 @@ public class TagService {
             return tagOpt.get().getPostTags();
         }
         return Set.of();
+    }
+
+    public List<Tag> getTopTags(int limit) {
+        Pageable topTen = PageRequest.of(0, limit, Sort.by("counts").descending());
+        Page<Tag> page = tagRepository.findTopTags(topTen);
+        return page.getContent();
     }
 }

@@ -60,5 +60,27 @@ public class Post implements Serializable {
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Comment> comments = new HashSet<>();
+
+    @Override
+    public String toString() {
+        return "Post{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", content='" + content + '\'' +
+                ", featuredImage='" + featuredImage + '\'' +
+                ", Route='" + Route + '\'' +
+                ", commentCount=" + commentCount +
+                ", viewdCount=" + viewdCount +
+                ", readingTime=" + readingTime +
+                ", authorId=" + authorId +
+                ", updatedAt=" + updatedAt +
+                ", createdAt=" + createdAt +
+                ", imagesCount=" + images.size() + // Just show the count instead of details
+                ", postTagsCount=" + postTags.size() + // Just show the count instead of details
+                ", postCategoriesCount=" + postCategories.size() + // Just show the count instead of details
+                ", commentsCount=" + comments.size() + // Just show the count instead of details
+                '}';
+    }
+
 }
 

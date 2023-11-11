@@ -289,4 +289,14 @@ public class PostService {
         }
     }
 
+    // Add this method to the PostService class
+
+    public List<Post> getPostsByAuthorId(int authorId) {
+        return postRepository.findByAuthorId((long) authorId);
+    }
+
+
+
+
+
 }

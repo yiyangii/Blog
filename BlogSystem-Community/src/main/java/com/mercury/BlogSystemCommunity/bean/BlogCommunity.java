@@ -18,5 +18,10 @@ public class BlogCommunity {
     private Long id;
     private String communityName;
     private Long communityCreator;
+    private String href;
+    private Integer count;
+    private Integer follow;
 
+    @Column(name = "description")
+    private String desc;
 }

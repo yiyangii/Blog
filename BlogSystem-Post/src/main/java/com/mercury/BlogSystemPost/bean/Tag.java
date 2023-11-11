@@ -14,9 +14,12 @@ import java.util.Set;
 @Table(name = "blog_tag", schema = "post_service")
 public class Tag implements Serializable {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "blog_post_tag_id_seq")
+    @SequenceGenerator(name = "blog_post_tag_id_seq", sequenceName = "post_service.blog_post_tag_id_seq", allocationSize = 1)
     private Long id;
     private String tagName;
+
+    private Integer counts;
 
     @OneToMany(mappedBy = "tag", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<PostTag> postTags = new HashSet<>();

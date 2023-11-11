@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -17,7 +18,11 @@ public class CommunityController {
 
     @Autowired
     private CommunityService communityService;
-
+    @GetMapping("/getAll")
+    public ResponseEntity<List<BlogCommunity>> getAllCommunities() {
+        List<BlogCommunity> communities = communityService.getAllCommunities();
+        return ResponseEntity.ok(communities);
+    }
     @PostMapping("/create")
     public ResponseEntity<BlogCommunity> createCommunity(@RequestBody BlogCommunity community) {
         BlogCommunity newCommunity = communityService.createCommunity(community);
@@ -52,6 +57,12 @@ public class CommunityController {
         } else {
             return new ResponseEntity<>("Unknown error", HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @GetMapping("/top")
+    public ResponseEntity<List<BlogCommunity>> getTopCommunities() {
+        List<BlogCommunity> topCommunities = communityService.getTopCommunities();
+        return ResponseEntity.ok(topCommunities);
     }
 
 }
