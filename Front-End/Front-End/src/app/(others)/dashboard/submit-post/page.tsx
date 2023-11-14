@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import Input from "components/Input/Input";
 import ButtonPrimary from "components/Button/ButtonPrimary";
 import Select from "components/Select/Select";
@@ -8,6 +8,43 @@ import Layout from "../../layout";
 import LayoutDashboard from "../layout";
 
 const DashboardSubmitPost = () => {
+  const [formData, setFormData] = useState({
+    title: "",
+    excerpt: "",
+    category: "-1",
+    tags: "",
+    content: "",
+    // 根据需要添加其他字段
+  });
+
+  const handleChange = (e: { target: { name: any; value: any; }; }) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e: { preventDefault: () => void; }) => {
+    e.preventDefault();
+    console.log(formData);
+
+    try {
+      const response = await fetch("http://localhost:8086/api/posts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        // 处理响应数据
+        console.log("Post submitted successfully");
+      } else {
+        console.error("Failed to submit post");
+      }
+    } catch (error) {
+      console.error("Error submitting post:", error);
+    }
+  };
+
   return (
     <Layout>
       <LayoutDashboard>
@@ -88,7 +125,7 @@ const DashboardSubmitPost = () => {
               <Textarea className="mt-1" rows={16} />
             </label>
 
-            <ButtonPrimary className="md:col-span-2" type="submit">
+            <ButtonPrimary  className="md:col-span-2" type="submit">
               Submit post
             </ButtonPrimary>
           </form>

@@ -50,7 +50,6 @@ const communitySlice = createSlice({
             })
             .addCase(fetchAllCommunities.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                // This assumes you want to overwrite the existing communities with the fetched list
                 state.communities = action.payload;
             })
             .addCase(fetchAllCommunities.rejected, (state, action) => {

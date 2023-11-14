@@ -36,6 +36,8 @@ export const fetchPostById = createAsyncThunk<PostDataType, number>(
         return transformedPost;
     }
 );
+
+
 export const fetchAllPosts = createAsyncThunk<PostDataType[], void>(
     'post/fetchAllPosts',
     async () => {
@@ -102,6 +104,8 @@ export const fetchAllPostsByAuthor = createAsyncThunk<PostDataType[], number>(
         });
     }
 );
+
+
 interface PostState {
     posts: PostDataType[];
     postsByAuthor: PostDataType[];

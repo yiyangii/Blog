@@ -9,9 +9,8 @@ import LayoutDashboard from "../layout";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchPostById } from "../../../../slices/postSlice";
 import { AppDispatch, RootState } from "../../../../store";
-import {TagType, TaxonomyType} from "../../../../data/types";
+import { TaxonomyType} from "../../../../data/types";
 import CategoriesComponent from "../../../../component/CategoriesComponent";
-import TagsComponent from "../../../../component/TagsComponent";
 import "../../../../styles/image-upload.css"
 
 const DashboardEditPost = () => {
@@ -88,7 +87,7 @@ const DashboardEditPost = () => {
         },
     ];
 
-    const [selectedTags, setSelectedTags] = useState<TagType[]>([]);
+    const [selectedTags, setSelectedTags] = useState<TaxonomyType[]>([]);
 
     const handleAddTag = (tagId: string | number| void) => {
         const tagToAdd = pseudoTags.find(tag => tag.id === tagId);

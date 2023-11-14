@@ -20,7 +20,11 @@ export interface TaxonomyType {
 
 
 }
-
+export interface TagType {
+  counts: number;
+  id: number;
+  tagName: string;
+}
 
 export interface Community {
   id: number;
@@ -32,16 +36,7 @@ export interface Community {
   desc: string;
 }
 
-export interface TagType {
-  id: string | number;
-  name: string;
-  href: string;
-  count?: number;
-  thumbnail?: string;
-  desc?: string;
-  color?: TwMainColor | string;
-  taxonomy: "category" | "tag";
-}
+
 export interface UserPostType {
   id: number;
   title: string;
