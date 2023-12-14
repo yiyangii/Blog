@@ -6,11 +6,16 @@ import SectionAds from "components/Sections/SectionAds";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCategories } from "../../slices/categorySlice";
 import { RootState, AppDispatch } from "../../store";
-import { fetchAllPosts } from "../../slices/postSlice";  // 注意修改这里
+import { fetchAllPosts } from "../../slices/postSlice";
 import { fetchUserById } from "../../slices/userSlice";
 import SectionMagazine2 from "components/Sections/SectionMagazine2";
 import { PostDataType } from "../../data/types";
 import Card2 from "components/Card2/Card2";
+import BackgroundSection from "../../components/BackgroundSection/BackgroundSection";
+import SectionSliderNewAuthors from "../../components/SectionSliderNewAthors/SectionSliderNewAuthors";
+import {DEMO_AUTHORS} from "../../data/authors";
+import SectionMagazine7 from "../../components/Sections/SectionMagazine7";
+import {DEMO_POSTS_GALLERY} from "../../data/posts";
 
 const PageHome = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -69,8 +74,20 @@ const PageHome = () => {
         }
     }, [postStatus, postsFromRedux, usersFromRedux]);
     return (
+
         <div className="nc-PageHome relative">
             <div className="container relative">
+                <div className="relative py-16">
+                    <SectionSliderNewAuthors
+                        heading="Welcome our Newest Creator"
+                        subHeading="Hello World!"
+                        authors={DEMO_AUTHORS.filter((_, i) => i < 10)}
+                    />
+                </div>
+                <SectionMagazine7
+                    className="py-16 lg:py-28"
+                    posts={localPosts.filter((_, i) => i < 6)}
+                />
                 <div className="mb-8">
                     <SectionSliderNewCategories
                         heading="Top trending Categories"
@@ -90,6 +107,7 @@ const PageHome = () => {
                 </div>
 
                 <SectionAds />
+
                 <button
                     className="fixed bottom-4 right-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
                 >

@@ -4,20 +4,20 @@ import { FC, Fragment } from "react";
 
 const solutions = [
   {
-    name: "Eden Tuan",
-    description: "Mentioned you in a comment",
-    time: "3 minutes ago",
+    name: "G G",
+    description: "Demo your project",
+    time: "10 minutes ago",
     href: "##",
   },
   {
-    name: "Leo Messi",
-    description: "Create your own targeted content",
+    name: "Peter",
+    description: "React React React!",
     time: "1 minute ago",
     href: "##",
   },
   {
-    name: "Leo Kante",
-    description: "Keep track of your growth",
+    name: "Yi",
+    description: ":(",
     time: "3 minutes ago",
     href: "##",
   },

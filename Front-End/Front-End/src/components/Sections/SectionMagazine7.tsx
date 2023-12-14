@@ -18,10 +18,11 @@ const SectionMagazine7: FC<SectionMagazine7Props> = ({
   posts = postsDemo,
   className = "",
 }) => {
+    console.log(posts)
   return (
     <div className={`nc-SectionMagazine7 relative ${className}`}>
-      <Heading desc={"Over 218 articles has gallery type"}>
-        {"View more gallery articles"}
+      <Heading desc={""}>
+        {"View more articles"}
       </Heading>
       <div className={`grid grid-cols-1 gap-6 md:gap-8`}>
         <div className={`grid gap-6 md:gap-8 lg:grid-cols-2`}>
@@ -31,6 +32,8 @@ const SectionMagazine7: FC<SectionMagazine7Props> = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 mt-3">
           <Card10 post={posts[2]} />
           <Card10 post={posts[3]} />
+            {posts[4] && <Card10 post={posts[4]} />}
+            {posts[5] && <Card10 post={posts[5]} />}
           {posts[4] && <Card10 post={posts[4]} />}
           {posts[5] && <Card10 post={posts[5]} />}
         </div>

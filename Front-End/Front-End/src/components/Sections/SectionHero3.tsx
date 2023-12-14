@@ -33,7 +33,7 @@ const SectionHero3: FC<SectionHero3Props> = ({ posts, className = "" }) => {
             </span>
             <div className="mt-5 sm:mt-8">
               <ButtonSecondary href={href}>
-                <span> Read more</span>
+                <span> Click to Read </span>
                 <ArrowRightIcon className="w-6 h-6 ml-3" />
               </ButtonSecondary>
             </div>
