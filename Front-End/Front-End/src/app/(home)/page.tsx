@@ -84,10 +84,10 @@ const PageHome = () => {
                         authors={DEMO_AUTHORS.filter((_, i) => i < 10)}
                     />
                 </div>
-                <SectionMagazine7
-                    className="py-16 lg:py-28"
-                    posts={localPosts.filter((_, i) => i < 6)}
-                />
+                {/*<SectionMagazine7*/}
+                {/*    className="py-16 lg:py-28"*/}
+                {/*    posts={localPosts.filter((_, i) => i < 6)}*/}
+                {/*/>*/}
                 <div className="mb-8">
                     <SectionSliderNewCategories
                         heading="Top trending Categories"

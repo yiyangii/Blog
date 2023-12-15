@@ -11,32 +11,72 @@ import {RootState} from "../../../../store";
 
 const DashboardSubmitPost = () => {
   const currentUser = useSelector((state: RootState) => state.user.currentUser);
+  const [userAddedCategories, setUserAddedCategories] = useState<string[]>([]);
+  const [userAddedTags, setUserAddedTags] = useState<string[]>([]);
+  const [newCategory, setNewCategory] = useState('');
+  const [newTag, setNewTag] = useState('');
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
 
-  const [formData, setFormData] = useState({
+  interface FormDataType {
+    title: string;
+    excerpt: string;
+    category: string;
+    tags: string[];
+    content: string;
+    authorId: number | string | undefined;
+    featuredImage?: File; // This is the new property for the image file
+  }
+  const [formData, setFormData] = useState<FormDataType>({
     title: "",
     excerpt: "",
     category: "-1",
-    tags: "",
+    tags: [],
     content: "",
-    authorId: currentUser?.id
+    authorId: currentUser?.id,
+    featuredImage: undefined // Initialize as undefined
   });
+  const [categories, setCategories] = useState([
+    { value: '-1', text: '– select –' },
+    { value: 'category1', text: 'Category 1' },
+    { value: 'category2', text: 'Category 2' },
+    { value: 'category3', text: 'Category 3' },
+  ]);
 
-  const handleChange = (e: { target: { name: any; value: any; }; }) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = async (e: { preventDefault: () => void; }) => {
-    e.preventDefault();
-    console.log(formData);
+  const handleAddCategory = () => {
+    const newCategoryValue = `category${categories.length + 1}`;
+    const newCategoryText = newCategory.trim();
 
+    if (newCategoryText !== "") {
+      setCategories([...categories, { value: newCategoryValue, text: newCategoryText }]);
+      setUserAddedCategories([...userAddedCategories, newCategoryText]);
+      setFormData({ ...formData, category: newCategoryValue });
+      setNewCategory('');
+    }
+  };
+
+  const handleAddTag = () => {
+    const newTagText = newTag.trim();
+    if (newTagText !== "" && !userAddedTags.includes(newTagText)) {
+      setUserAddedTags([...userAddedTags, newTagText]);
+      setFormData({ ...formData, tags: [...formData.tags, newTagText] });
+      setNewTag('');
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     try {
       const response = await fetch("http://localhost:8086/api/posts", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, tags: userAddedTags }),
       });
 
       if (response.ok) {
@@ -46,6 +86,21 @@ const DashboardSubmitPost = () => {
       }
     } catch (error) {
       console.error("Error submitting post:", error);
+    }
+  };
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+
+      // Update the form data with the selected file
+      setFormData({ ...formData, featuredImage: file });
+
+      // Create a URL for the file to set as the image preview
+      const reader = new FileReader();
+      reader.onload = (loadEvent) => {
+        setImagePreviewUrl(loadEvent.target?.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -79,34 +134,78 @@ const DashboardSubmitPost = () => {
               </label>
               <label className="block">
                 <Label>Category</Label>
-                <Select
-                    className="mt-1"
-                    name="category"
-                    value={formData.category}
-                    onChange={handleChange}
-                >
-                  <option value="-1">– select –</option>
-                  <option value="category1">Category 1</option>
-                  <option value="category2">Category 2</option>
-                  <option value="category3">Category 3</option>
-                </Select>
+
+                <div className="mt-2 flex">
+                  <Input
+                      type="text"
+                      className="mt-1"
+                      placeholder="Add new category"
+                      value={newCategory}
+                      onChange={(e) => setNewCategory(e.target.value)}
+                  />
+                  <ButtonPrimary className="ml-2" onClick={handleAddCategory}>
+                    Add
+                  </ButtonPrimary>
+                </div>
+                {/* Display user-added categories */}
+                {userAddedCategories.length > 0 && (
+                    <div className="mt-2">
+                      <Label>Your Categories:</Label>
+                      <ul>
+                        {userAddedCategories.map((category, index) => (
+                            <li key={index}>{category}</li>
+                        ))}
+                      </ul>
+                    </div>
+                )}
               </label>
               <label className="block">
                 <Label>Tags</Label>
-                <Input
-                    type="text"
-                    className="mt-1"
-                    name="tags"
-                    value={formData.tags}
-                    onChange={handleChange}
-                />
+                <div className="mt-2 flex">
+                  <Input
+                      type="text"
+                      className="mt-1"
+                      placeholder="Add new tag"
+                      value={newTag}
+                      onChange={(e) => setNewTag(e.target.value)}
+                  />
+                  <ButtonPrimary className="ml-2" onClick={handleAddTag}>
+                    Add
+                  </ButtonPrimary>
+                </div>
+                {userAddedTags.length > 0 && (
+                    <div className="mt-2">
+                      <Label>Your Tags:</Label>
+                      <ul>
+                        {userAddedTags.map((tag, index) => (
+                            <li key={index}>{tag}</li>
+                        ))}
+                      </ul>
+                    </div>
+                )}
               </label>
-              {/* ... 其他部分保持不变 ... */}
               <div className="block md:col-span-2">
                 <Label>Featured Image</Label>
-
+                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-neutral-300 dark:border-neutral-700 border-dashed rounded-md">
+                  {imagePreviewUrl ? (
+                      <img src={imagePreviewUrl} alt="Preview" className="max-w-full h-auto" />
+                  ) : (
+                      <div className="space-y-1 text-center">
+                        {/* ... existing SVG and label ... */}
+                        <input
+                            id="file-upload"
+                            name="file-upload"
+                            type="file"
+                            className="sr-only"
+                            onChange={handleImageChange}
+                        />
+                      </div>
+                  )}
+                </div>
                 <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-neutral-300 dark:border-neutral-700 border-dashed rounded-md">
                   <div className="space-y-1 text-center">
+
+
                     <svg
                         className="mx-auto h-12 w-12 text-neutral-400"
                         stroke="currentColor"

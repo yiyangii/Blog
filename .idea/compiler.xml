@@ -11,11 +11,11 @@
         <module name="BlogSystem-Community" />
         <module name="eureka" />
         <module name="BlogSystem-Post" />
-        <module name="BlogSystem-Auth" />
         <module name="BlogSystem-Follow" />
+        <module name="BlogSystem-Auth" />
         <module name="BlogSystem-Message" />
-        <module name="BlogSystem-Gateway" />
         <module name="BlogSystem-UserBehaviour" />
+        <module name="BlogSystem-Gateway" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>

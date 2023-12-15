@@ -105,10 +105,10 @@ public class UserListener {
     }
 
 
-    @RabbitListener(queues = "user.delete.failed.queue")
-    public void handleUserDeleteFailed(Long userId) {
-        logger.error("Failed to delete user with ID: " + userId);
-    }
+//    @RabbitListener(queues = "user.delete.failed.queue")
+//    public void handleUserDeleteFailed(Long userId) {
+//        logger.error("Failed to delete user with ID: " + userId);
+//    }
 
     @RabbitListener(queues = "followCommunityQueue")
     public void handleUserFollowedCommunity(Map<String, Object> message) {
