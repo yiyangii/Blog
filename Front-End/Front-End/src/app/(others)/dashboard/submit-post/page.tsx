@@ -15,7 +15,9 @@ const DashboardSubmitPost = () => {
   const [userAddedTags, setUserAddedTags] = useState<string[]>([]);
   const [newCategory, setNewCategory] = useState('');
   const [newTag, setNewTag] = useState('');
-  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+
 
   interface FormDataType {
     title: string;
@@ -24,17 +26,20 @@ const DashboardSubmitPost = () => {
     tags: string[];
     content: string;
     authorId: number | string | undefined;
-    featuredImage?: File; // This is the new property for the image file
+    featuredImages: File[]; // This is the new property for the image file
   }
   const [formData, setFormData] = useState<FormDataType>({
     title: "",
     excerpt: "",
     category: "-1",
-    tags: [],
+    tags: [], // Initialize as an empty array of strings
     content: "",
     authorId: currentUser?.id,
-    featuredImage: undefined // Initialize as undefined
+    featuredImages: [],
   });
+
+
+
   const [categories, setCategories] = useState([
     { value: '-1', text: '– select –' },
     { value: 'category1', text: 'Category 1' },
@@ -45,6 +50,7 @@ const DashboardSubmitPost = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+    console.log(formData);
   };
 
   const handleAddCategory = () => {
@@ -67,42 +73,113 @@ const DashboardSubmitPost = () => {
       setNewTag('');
     }
   };
+  const convertFormDataToApiFormat = (formData: { tags: any; title: any; excerpt?: string; category?: string; content: any; authorId: any; featuredImages: any; }) => {
+    const apiData = {
+      title: formData.title,
+      content: formData.content,
+      authorId: formData.authorId,
+      visibility: "public", // 假设默认为公开
+      images: formData.featuredImages.map((image: { url: any; altText: any; }) => ({
+        url: image.url || "default_url.jpg", // 你需要提供一个方法来确定图片的 URL
+        altText: image.altText || "Image description" // 你需要提供一个方法来确定 alt 文本
+      })),
+      postTags: formData.tags.map((tagId: any) => ({
+        tag: {
+          id: tagId // 使用标签的 ID 而不是名称
+        }
+      }))
+    };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+    return apiData;
+  };
+  const fetchTagId = async (tagName: string) => {
     try {
+      const response = await fetch('http://localhost:8086/api/tags/getOrCreate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ tagName }),
+      });
+      const data = await response.json();
+      return data.id;
+    } catch (error) {
+      console.error('Error fetching tag ID:', error);
+      return null; // 或者处理错误
+    }
+  };
+
+  const handleSubmit = async (e: { preventDefault: () => void; }) => {
+    e.preventDefault();
+
+    try {
+      // 获取标签 ID
+      const tagIds = await Promise.all(
+          userAddedTags.map(tagName => fetchTagId(tagName))
+      );
+
+      // 过滤出有效的 ID
+      const validTagIds = tagIds.filter(id => id !== null);
+
+      if (validTagIds.length !== userAddedTags.length) {
+        console.error("Some tags couldn't be processed");
+        // 可以在这里添加处理错误的逻辑，比如显示错误信息
+        return;
+      }
+
+      // 更新表单数据
+      const updatedFormData = {
+        ...formData,
+        tags: validTagIds
+      };
+
+      // 转换表单数据格式
+      const postData = convertFormDataToApiFormat(updatedFormData);
+
+      // 发送请求
       const response = await fetch("http://localhost:8086/api/posts", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ ...formData, tags: userAddedTags }),
+        body: JSON.stringify(postData),
       });
 
       if (response.ok) {
         console.log("Post submitted successfully");
+        // 这里可以添加成功提交后的逻辑
       } else {
         console.error("Failed to submit post");
+        // 可以在这里添加提交失败的逻辑
       }
     } catch (error) {
       console.error("Error submitting post:", error);
+      // 可以在这里添加异常处理逻辑
     }
   };
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
+    if (e.target.files) {
+      const filesArray = Array.from(e.target.files);
+      const filePreviews = filesArray.map(file => URL.createObjectURL(file));
 
-      // Update the form data with the selected file
-      setFormData({ ...formData, featuredImage: file });
-
-      // Create a URL for the file to set as the image preview
-      const reader = new FileReader();
-      reader.onload = (loadEvent) => {
-        setImagePreviewUrl(loadEvent.target?.result as string);
-      };
-      reader.readAsDataURL(file);
+      setImageFiles(prevFiles => [...prevFiles, ...filesArray]);
+      setImagePreviews(prevPreviews => [...prevPreviews, ...filePreviews]);
+      setFormData(prevFormData => ({
+        ...prevFormData,
+        featuredImages: [...prevFormData.featuredImages, ...filesArray],
+      }));
     }
   };
+  const handleRemoveImage = (index: number) => {
+    setImageFiles(prevFiles => prevFiles.filter((_, i) => i !== index));
+    setImagePreviews(prevPreviews => prevPreviews.filter((_, i) => i !== index));
+    setFormData(prevFormData => ({
+      ...prevFormData,
+      featuredImages: prevFormData.featuredImages.filter((_, i) => i !== index),
+    }));
+  };
+
 
   return (
       <Layout>
@@ -186,22 +263,25 @@ const DashboardSubmitPost = () => {
               </label>
               <div className="block md:col-span-2">
                 <Label>Featured Image</Label>
-                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-neutral-300 dark:border-neutral-700 border-dashed rounded-md">
-                  {imagePreviewUrl ? (
-                      <img src={imagePreviewUrl} alt="Preview" className="max-w-full h-auto" />
-                  ) : (
-                      <div className="space-y-1 text-center">
-                        {/* ... existing SVG and label ... */}
-                        <input
-                            id="file-upload"
-                            name="file-upload"
-                            type="file"
-                            className="sr-only"
-                            onChange={handleImageChange}
-                        />
+                <div className="mt-1 flex flex-wrap justify-center gap-2 border-2 border-dashed border-neutral-300 p-2 rounded-md">
+                  {imagePreviews.map((src, index) => (
+                      <div key={index} className="relative">
+                        <img src={src} alt={`Preview ${index}`} className="h-24 w-24 object-cover rounded-md" />
+                        <button type="button" className="absolute top-0 right-0 bg-white rounded-full p-1" onClick={() => handleRemoveImage(index)}>
+                          <svg className="h-6 w-6 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
                       </div>
-                  )}
+                  ))}
+                  <label htmlFor="file-upload" className="flex items-center justify-center h-24 w-24 border-2 border-neutral-300 border-dashed rounded-md cursor-pointer">
+                    <input id="file-upload" name="file-upload" type="file" className="sr-only" onChange={handleImageChange} multiple />
+                    <svg className="h-8 w-8 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      {/* SVG path for upload icon */}
+                    </svg>
+                  </label>
                 </div>
+
                 <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-neutral-300 dark:border-neutral-700 border-dashed rounded-md">
                   <div className="space-y-1 text-center">
 
@@ -239,13 +319,10 @@ const DashboardSubmitPost = () => {
                       PNG, JPG, GIF up to 2MB
                     </p>
                   </div>
+
                 </div>
               </div>
-              <label className="block md:col-span-2">
-                <Label> Post Content</Label>
 
-                <Textarea className="mt-1" rows={16} />
-              </label>
               <label className="block md:col-span-2">
                 <Label>Post Content</Label>
                 <Textarea

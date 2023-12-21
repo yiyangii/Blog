@@ -132,5 +132,10 @@ public class PostController {
         }
         return ResponseEntity.ok(topTags);
     }
+    @PostMapping("/getOrCreate")
+    public ResponseEntity<Long> getOrCreateTag(@RequestBody String tagName) {
+        Tag tag = tagService.getOrCreateTag(tagName);
+        return ResponseEntity.ok(tag.getId());
+    }
 
 }

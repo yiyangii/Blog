@@ -60,4 +60,15 @@ public class TagService {
         Page<Tag> page = tagRepository.findTopTags(topTen);
         return page.getContent();
     }
+
+    public Tag getOrCreateTag(String tagName) {
+        Tag tag = tagRepository.findByTagName(tagName);
+        if (tag == null) {
+            tag = new Tag();
+            tag.setTagName(tagName);
+            tag.setCounts(0); // 初始化计数
+            tag = tagRepository.save(tag);
+        }
+        return tag;
+    }
 }

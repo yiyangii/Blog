@@ -11,4 +11,6 @@ import org.springframework.stereotype.Repository;
 public interface TagRepository extends JpaRepository<Tag, Long> {
     @Query("SELECT t FROM Tag t ORDER BY t.counts DESC")
     Page<Tag> findTopTags(Pageable pageable);
+
+    Tag findByTagName(String tagName);
 }
