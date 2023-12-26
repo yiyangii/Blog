@@ -21,6 +21,6 @@ public class Tag implements Serializable {
 
     private Integer counts;
 
-    @OneToMany(mappedBy = "tag", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "tag", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<PostTag> postTags = new HashSet<>();
 }

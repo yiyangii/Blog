@@ -65,11 +65,13 @@ const DashboardSubmitPost = () => {
     }
   };
 
-  const handleAddTag = () => {
+  const handleAddTag = async () => {
     const newTagText = newTag.trim();
     if (newTagText !== "" && !userAddedTags.includes(newTagText)) {
       setUserAddedTags([...userAddedTags, newTagText]);
       setFormData({ ...formData, tags: [...formData.tags, newTagText] });
+      const tagId = await fetchTagId(newTagText); // 获取新标签的ID
+      console.log(`Tag "${newTagText}" has been added with ID: ${tagId}`); // 测试：打印新标签的名称和ID
       setNewTag('');
     }
   };
@@ -77,7 +79,7 @@ const DashboardSubmitPost = () => {
     const apiData = {
       title: formData.title,
       content: formData.content,
-      authorId: formData.authorId,
+      authorId : currentUser?.id,
       visibility: "public", // 假设默认为公开
       images: formData.featuredImages.map((image: { url: any; altText: any; }) => ({
         url: image.url || "default_url.jpg", // 你需要提供一个方法来确定图片的 URL
@@ -93,19 +95,24 @@ const DashboardSubmitPost = () => {
     return apiData;
   };
   const fetchTagId = async (tagName: string) => {
+    console.log('Fetching tag ID for:', tagName);
     try {
-      const response = await fetch('http://localhost:8086/api/tags/getOrCreate', {
+      const response = await fetch('http://localhost:8086/api/posts/getOrCreate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ tagName }),
+        body: tagName ,
       });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const data = await response.json();
-      return data.id;
+      console.log('Fetched tag ID:', data); // 测试：打印获取到的ID
+      return data;
     } catch (error) {
       console.error('Error fetching tag ID:', error);
-      return null; // 或者处理错误
+      return null;
     }
   };
 
@@ -123,7 +130,6 @@ const DashboardSubmitPost = () => {
 
       if (validTagIds.length !== userAddedTags.length) {
         console.error("Some tags couldn't be processed");
-        // 可以在这里添加处理错误的逻辑，比如显示错误信息
         return;
       }
 
@@ -135,6 +141,7 @@ const DashboardSubmitPost = () => {
 
       // 转换表单数据格式
       const postData = convertFormDataToApiFormat(updatedFormData);
+      console.log(postData);
 
       // 发送请求
       const response = await fetch("http://localhost:8086/api/posts", {
@@ -147,14 +154,14 @@ const DashboardSubmitPost = () => {
 
       if (response.ok) {
         console.log("Post submitted successfully");
-        // 这里可以添加成功提交后的逻辑
+
       } else {
         console.error("Failed to submit post");
-        // 可以在这里添加提交失败的逻辑
+
       }
     } catch (error) {
       console.error("Error submitting post:", error);
-      // 可以在这里添加异常处理逻辑
+
     }
   };
 
@@ -246,9 +253,10 @@ const DashboardSubmitPost = () => {
                       value={newTag}
                       onChange={(e) => setNewTag(e.target.value)}
                   />
-                  <ButtonPrimary className="ml-2" onClick={handleAddTag}>
+                  <ButtonPrimary type="button" className="ml-2" onClick={handleAddTag}>
                     Add
                   </ButtonPrimary>
+
                 </div>
                 {userAddedTags.length > 0 && (
                     <div className="mt-2">

@@ -68,6 +68,7 @@ public class PostService {
     }
     @Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED)
     public Post savePost(Post post) {
+        System.out.println(post);
         try {
             Set<PostCategory> postCategories = post.getPostCategories();
             if (postCategories != null) {
