@@ -2,8 +2,11 @@ package com.mercury.BlogSystemPost.controller;
 
 
 
+import com.mercury.BlogSystemPost.bean.Category;
 import com.mercury.BlogSystemPost.bean.Post;
+import com.mercury.BlogSystemPost.bean.PostCategory;
 import com.mercury.BlogSystemPost.bean.Tag;
+import com.mercury.BlogSystemPost.service.CategoryService;
 import com.mercury.BlogSystemPost.service.PostService;
 import com.mercury.BlogSystemPost.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -19,6 +23,8 @@ import java.util.Optional;
 public class PostController {
     @Autowired
     private TagService tagService;
+    @Autowired
+    private CategoryService categoryService;
     private final PostService postService;
 
     @Autowired
@@ -137,5 +143,18 @@ public class PostController {
         Tag tag = tagService.getOrCreateTag(tagName);
         return ResponseEntity.ok(tag.getId());
     }
+
+    @PostMapping("/getOrCreateCategory")
+    public ResponseEntity<Long> getOrCreateCategory(@RequestBody Map<String, String> category){
+        String categoryName = category.get("name");
+        Long categoryId = categoryService.getOrCreateCategoryByName(categoryName);
+        return ResponseEntity.ok(categoryId);
+    }
+    @GetMapping("/{categoryId}/postids")
+    public ResponseEntity<List<Integer>> getPostIdsByCategory(@PathVariable int categoryId) {
+        List<Integer> postIds = postService.getPostIdsByCategoryId(categoryId);
+        return ResponseEntity.ok(postIds);
+    }
+
 
 }

@@ -24,6 +24,7 @@ import PageHomeDemo6 from "../app/(home)/home-6/page";
 import CommunityComponent from "../app/(home)/home-3/page";
 import ViewAllCommunities from "../component/ViewAllCommunities";
 import PageHomeDemo2 from "../app/(home)/home-2/page";
+import CategoryPage from "../component/CategoryPage";
 
 
 export const pages: Page[] = [
@@ -40,7 +41,9 @@ export const pages: Page[] = [
     { path: "/post-edit/:id",component:DashboardEditPost},
     { path: "/Blog-Community/community",component:CommunityComponent},
     {path: "//view-all-communities",component:ViewAllCommunities},
-    {path : "/Blog-Post/post",component:PageHomeDemo2}
+    {path : "/Blog-Post/post",component:PageHomeDemo2},
+    { path: "/category/:id", component: CategoryPage }
+
 
 
 

@@ -14,12 +14,11 @@ const CardCategory1: FC<CardCategory1Props> = ({
   size = "normal",
   taxonomy,
 }) => {
-  const { count, name, href = "/", thumbnail } = taxonomy;
+  const { count, name, id, thumbnail } = taxonomy;
+  const categoryUrl = `/category/${id}`; // Construct the URL using the category ID
   return (
-    <Link
-      href={href}
-      className={`nc-CardCategory1 flex items-center ${className}`}
-    >
+      <Link href={categoryUrl} className={`nc-CardCategory1 flex items-center ${className}`}>
+
       <NcImage
         alt=""
         containerClassName={`relative flex-shrink-0 ${

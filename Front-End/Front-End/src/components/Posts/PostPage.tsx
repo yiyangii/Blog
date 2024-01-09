@@ -19,9 +19,15 @@ const PostPage: React.FC = () => {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
     useEffect(() => {
-        dispatch(fetchPostById(Number(id)));
+        if (id) {
+            dispatch(fetchPostById(Number(id)));
+        }
     }, [id, dispatch]);
-
+    useEffect(() => {
+        if (post) {
+            setLocalPost(post);
+        }
+    }, [post]);
     useEffect(() => {
         if (post) {
             const relatedUser = usersFromRedux[post.authorId];
@@ -39,6 +45,8 @@ const PostPage: React.FC = () => {
                     }
                 };
                 setLocalPost(updatedPost);
+            }else {
+                setLocalPost(post); // set post even if related user is not found
             }
         }
     }, [post, usersFromRedux]);
@@ -52,11 +60,11 @@ const PostPage: React.FC = () => {
     };
 
     console.log("local"  + localPost);
-    if (!localPost || !localPost.galleryImgs || localPost.galleryImgs.length === 0) {
+    if (!localPost) {
         return <div>Loading...</div>;
     }
 
-    const currentImage = localPost.galleryImgs[currentImageIndex];
+    const currentImage = localPost.galleryImgs?.[currentImageIndex] || 'default_image_url.jpg';
 
     return (
         <div className="container relative">

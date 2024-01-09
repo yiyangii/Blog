@@ -36,6 +36,22 @@ export const fetchPostById = createAsyncThunk<PostDataType, number>(
         return transformedPost;
     }
 );
+export const fetchPostsByMultipleIds = createAsyncThunk<PostDataType[], number[]>(
+    'post/fetchPostsByMultipleIds',
+    async (postIds, { dispatch }) => {
+        // Create an array of promises, each fetching a post by its ID
+        const promises = postIds.map(id =>
+            dispatch(fetchPostById(id)).unwrap()
+        );
+
+        // Wait for all the promises to resolve
+        const posts = await Promise.all(promises);
+
+        // Return the array of fetched posts
+        return posts;
+    }
+);
+
 
 
 export const fetchAllPosts = createAsyncThunk<PostDataType[], void>(
@@ -105,10 +121,24 @@ export const fetchAllPostsByAuthor = createAsyncThunk<PostDataType[], number>(
     }
 );
 
-
+export const fetchAllPostIdsByCategory = createAsyncThunk<number[], number, { rejectValue: string }>(
+    'post/fetchAllPostIdsByCategory',
+    async (categoryId, { rejectWithValue }) => {
+        try {
+            const response = await axios.get(`http://localhost:8086/api/posts/${categoryId}/postids`);
+            return response.data;
+        } catch (error) {
+            if (axios.isAxiosError(error) && error.response) {
+                return rejectWithValue(error.response.data as string);
+            }
+            throw error;
+        }
+    }
+);
 interface PostState {
     posts: PostDataType[];
     postsByAuthor: PostDataType[];
+    postIdsByCategory: number[];
     post: PostDataType | null;
     status: 'idle' | 'loading' | 'succeeded' | 'failed';
     error: string | null;
@@ -117,6 +147,7 @@ interface PostState {
 const initialState: PostState = {
     posts: [],
     postsByAuthor: [],
+    postIdsByCategory: [],
     post: null,
     status: 'idle',
     error: null
@@ -127,12 +158,28 @@ const postSlice = createSlice({
     name: 'post',
     initialState,
     reducers: {},
-    extraReducers: builder => {
+    extraReducers: (builder) => {
         builder
+            .addCase(fetchPostsByMultipleIds.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(fetchPostsByMultipleIds.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+                // Append new posts to the state
+                action.payload.forEach(post => {
+                    if (!state.posts.find(p => p.id === post.id)) {
+                        state.posts.push(post);
+                    }
+                });
+            })
+            .addCase(fetchPostsByMultipleIds.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.error.message || "An error occurred.";
+            })
             .addCase(fetchPostById.pending, (state) => {
                 state.status = 'loading';
             })
-            .addCase(fetchPostById.fulfilled, (state, action: PayloadAction<PostDataType>) => {
+            .addCase(fetchPostById.fulfilled, (state, action) => {
                 state.status = 'succeeded';
                 state.post = action.payload;
             })
@@ -143,7 +190,7 @@ const postSlice = createSlice({
             .addCase(fetchAllPosts.pending, (state) => {
                 state.status = 'loading';
             })
-            .addCase(fetchAllPosts.fulfilled, (state, action: PayloadAction<PostDataType[]>) => {
+            .addCase(fetchAllPosts.fulfilled, (state, action) => {
                 state.status = 'succeeded';
                 state.posts = action.payload;
             })
@@ -154,15 +201,30 @@ const postSlice = createSlice({
             .addCase(fetchAllPostsByAuthor.pending, (state) => {
                 state.status = 'loading';
             })
-            .addCase(fetchAllPostsByAuthor.fulfilled, (state, action: PayloadAction<PostDataType[]>) => {
+            .addCase(fetchAllPostsByAuthor.fulfilled, (state, action) => {
                 state.status = 'succeeded';
                 state.postsByAuthor = action.payload;
             })
             .addCase(fetchAllPostsByAuthor.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.error.message || "An error occurred.";
+            })
+            // Assuming you have created and exported this async thunk
+            .addCase(fetchAllPostIdsByCategory.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(fetchAllPostIdsByCategory.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+                // Make sure to have a corresponding array in your state to hold these IDs
+                state.postIdsByCategory = action.payload;
+            })
+            .addCase(fetchAllPostIdsByCategory.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.error.message || "An error occurred.";
             });
     }
 });
+
+
 
 export default postSlice.reducer;

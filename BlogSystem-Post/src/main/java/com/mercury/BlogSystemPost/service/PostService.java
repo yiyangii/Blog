@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.Date;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -298,6 +299,15 @@ public class PostService {
 
 
 
+
+    public List<Integer> getPostIdsByCategoryId(int categoryId) {
+        List<PostCategory> postCategories = postCategoryRepository.findByCategoryId(categoryId);
+
+        // Now extract the post IDs from the PostCategory objects
+        return postCategories.stream()
+                .map(postCategory -> postCategory.getPost().getId())
+                .collect(Collectors.toList());
+    }
 
 
 }

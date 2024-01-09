@@ -8,6 +8,7 @@ import Layout from "../../layout";
 import LayoutDashboard from "../layout";
 import {useSelector} from "react-redux";
 import {RootState} from "../../../../store";
+import { useNavigate } from "react-router-dom";
 
 const DashboardSubmitPost = () => {
   const currentUser = useSelector((state: RootState) => state.user.currentUser);
@@ -17,12 +18,13 @@ const DashboardSubmitPost = () => {
   const [newTag, setNewTag] = useState('');
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const history= useNavigate();
 
 
   interface FormDataType {
     title: string;
     excerpt: string;
-    category: string;
+    category: string[];
     tags: string[];
     content: string;
     authorId: number | string | undefined;
@@ -31,8 +33,8 @@ const DashboardSubmitPost = () => {
   const [formData, setFormData] = useState<FormDataType>({
     title: "",
     excerpt: "",
-    category: "-1",
-    tags: [], // Initialize as an empty array of strings
+    category: [],
+    tags: [],
     content: "",
     authorId: currentUser?.id,
     featuredImages: [],
@@ -40,12 +42,7 @@ const DashboardSubmitPost = () => {
 
 
 
-  const [categories, setCategories] = useState([
-    { value: '-1', text: '– select –' },
-    { value: 'category1', text: 'Category 1' },
-    { value: 'category2', text: 'Category 2' },
-    { value: 'category3', text: 'Category 3' },
-  ]);
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -53,47 +50,82 @@ const DashboardSubmitPost = () => {
     console.log(formData);
   };
 
-  const handleAddCategory = () => {
-    const newCategoryValue = `category${categories.length + 1}`;
-    const newCategoryText = newCategory.trim();
 
-    if (newCategoryText !== "") {
-      setCategories([...categories, { value: newCategoryValue, text: newCategoryText }]);
+  const handleAddCategory = async () => {
+    const newCategoryText = newCategory.trim();
+    if (newCategoryText !== "" && !userAddedCategories.includes(newCategoryText)) {
       setUserAddedCategories([...userAddedCategories, newCategoryText]);
-      setFormData({ ...formData, category: newCategoryValue });
+      const categoryId = await fetchCategoryId(newCategoryText);
+      if (categoryId) {
+        setFormData({ ...formData, category: [...formData.category, categoryId] });
+        console.log(`Category "${newCategoryText}" has been added with ID: ${categoryId}`);
+      } else {
+        console.error("Failed to fetch or create category");
+      }
       setNewCategory('');
     }
   };
+
 
   const handleAddTag = async () => {
     const newTagText = newTag.trim();
     if (newTagText !== "" && !userAddedTags.includes(newTagText)) {
       setUserAddedTags([...userAddedTags, newTagText]);
       setFormData({ ...formData, tags: [...formData.tags, newTagText] });
-      const tagId = await fetchTagId(newTagText); // 获取新标签的ID
-      console.log(`Tag "${newTagText}" has been added with ID: ${tagId}`); // 测试：打印新标签的名称和ID
+      const tagId = await fetchTagId(newTagText);
+      console.log(`Tag "${newTagText}" has been added with ID: ${tagId}`);
       setNewTag('');
     }
   };
-  const convertFormDataToApiFormat = (formData: { tags: any; title: any; excerpt?: string; category?: string; content: any; authorId: any; featuredImages: any; }) => {
+  const convertFormDataToApiFormat = (formData: { tags: any; title: any; excerpt?: string; category: any; content: any; authorId?: string | number | undefined; featuredImages: any; }) => {
     const apiData = {
       title: formData.title,
       content: formData.content,
-      authorId : currentUser?.id,
-      visibility: "public", // 假设默认为公开
+      authorId: currentUser?.id,
+      visibility: "public", // Assuming the default is public
+      postCategories: formData.category.map((categoryId: any) => ({
+        category: {
+          id: categoryId
+        }
+      })),
       images: formData.featuredImages.map((image: { url: any; altText: any; }) => ({
-        url: image.url || "default_url.jpg", // 你需要提供一个方法来确定图片的 URL
-        altText: image.altText || "Image description" // 你需要提供一个方法来确定 alt 文本
+        url: image.url || "default_url.jpg",
+        altText: image.altText || "Image description"
       })),
       postTags: formData.tags.map((tagId: any) => ({
         tag: {
-          id: tagId // 使用标签的 ID 而不是名称
+          id: tagId
         }
       }))
     };
 
     return apiData;
   };
+
+
+  const fetchCategoryId = async (categoryName: string) => {
+    console.log('Fetching category ID for:', categoryName);
+    try {
+      const response = await fetch('http://localhost:8086/api/posts/getOrCreateCategory', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: categoryName }), // The server expects an object with a "name" property
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log('Fetched category ID:', data);
+      return data; // Ensure that this returns the ID or the object containing the ID as needed
+    } catch (error) {
+      console.error('Error fetching category ID:', error);
+      return null;
+    }
+  };
+
+
   const fetchTagId = async (tagName: string) => {
     console.log('Fetching tag ID for:', tagName);
     try {
@@ -108,7 +140,7 @@ const DashboardSubmitPost = () => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      console.log('Fetched tag ID:', data); // 测试：打印获取到的ID
+      console.log('Fetched tag ID:', data);
       return data;
     } catch (error) {
       console.error('Error fetching tag ID:', error);
@@ -120,12 +152,10 @@ const DashboardSubmitPost = () => {
     e.preventDefault();
 
     try {
-      // 获取标签 ID
       const tagIds = await Promise.all(
           userAddedTags.map(tagName => fetchTagId(tagName))
       );
 
-      // 过滤出有效的 ID
       const validTagIds = tagIds.filter(id => id !== null);
 
       if (validTagIds.length !== userAddedTags.length) {
@@ -133,17 +163,17 @@ const DashboardSubmitPost = () => {
         return;
       }
 
-      // 更新表单数据
+
       const updatedFormData = {
         ...formData,
         tags: validTagIds
       };
 
-      // 转换表单数据格式
+
       const postData = convertFormDataToApiFormat(updatedFormData);
       console.log(postData);
 
-      // 发送请求
+
       const response = await fetch("http://localhost:8086/api/posts", {
         method: "POST",
         headers: {
@@ -153,11 +183,11 @@ const DashboardSubmitPost = () => {
       });
 
       if (response.ok) {
-        console.log("Post submitted successfully");
-
+        const newPost = await response.json(); // Assuming the response contains the new post data
+        const newPostId = newPost.id; // Replace with actual property name containing the ID
+        history(`/post/${newPostId}`); // Redirect to the PostPage
       } else {
         console.error("Failed to submit post");
-
       }
     } catch (error) {
       console.error("Error submitting post:", error);
@@ -227,7 +257,7 @@ const DashboardSubmitPost = () => {
                       value={newCategory}
                       onChange={(e) => setNewCategory(e.target.value)}
                   />
-                  <ButtonPrimary className="ml-2" onClick={handleAddCategory}>
+                  <ButtonPrimary type="button" className="ml-2" onClick={handleAddCategory}>
                     Add
                   </ButtonPrimary>
                 </div>

@@ -8,6 +8,7 @@ import PostTypeFeaturedIcon from "components/PostTypeFeaturedIcon/PostTypeFeatur
 import Link from "components/Link";
 import Image from "components/Image";
 import PostCardMeta from "../PostCardMeta/PostCardMeta";
+import {useNavigate} from "react-router-dom";
 
 export interface Card2Props {
   className?: string;
@@ -20,11 +21,16 @@ const Card2: FC<Card2Props> = ({
   size = "normal",
   post,
 }) => {
-  const { title, href, readingTime, featuredImage, categories, postType } =
-    post;
+    const { title, href, readingTime, featuredImage, categories, postType, id } = post;
+
+    const navigate = useNavigate();
+
+    const handleCardClick = () => {
+        navigate(`/post/${id}`);;
+    };
 
   return (
-      <div className={`nc-Card2 group relative flex flex-col p-4 ${className}`}>
+      <div className={`nc-Card2 group relative flex flex-col p-4 ${className}`} onClick={handleCardClick}>
         <div className="block flex-shrink-0 flex-grow relative w-full h-0 pt-[75%] sm:pt-[55%] z-0 rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
           <Image
               fill
@@ -60,9 +66,9 @@ const Card2: FC<Card2Props> = ({
               {title}
             </Link>
           </h2>
-          <span className="block text-neutral-500 dark:text-neutral-400 text-[15px] leading-6 ">
-            This is a post for Testing
-          </span>
+          {/*<span className="block text-neutral-500 dark:text-neutral-400 text-[15px] leading-6 ">*/}
+          {/*  This is a post for Testing*/}
+          {/*</span>*/}
         </div>
         <div className="my-5 border-t border-neutral-200 dark:border-neutral-700"></div>
         <div className="flex items-center justify-between">

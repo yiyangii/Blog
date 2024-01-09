@@ -7,9 +7,9 @@ import {AppDispatch, RootState} from "../../store";
 
 
 
-const CategoryCard: React.FC<TaxonomyType> = ({ name, href, thumbnail, desc, color }) => {
+const CategoryCard: React.FC<TaxonomyType> = ({ id, name, thumbnail, desc, color }) => {
     return (
-        <Link to={href} className={`block relative overflow-hidden rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 ease-in-out ${color}`}>
+        <Link to={`/category/${id}`} className={`block relative overflow-hidden rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 ease-in-out ${color}`}>
             <img src={thumbnail} alt={name} className="w-full h-52 object-cover transition-opacity duration-300 hover:opacity-70" />
             <div className="absolute inset-0 bg-black bg-opacity-40 transition-opacity duration-300 hover:bg-opacity-50 flex items-center justify-center">
                 <div className="text-center">

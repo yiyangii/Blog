@@ -4,7 +4,9 @@ import categoryReducer from './slices/categorySlice';
 import postReducer from './slices/postSlice';
 import userReducer from './slices/userSlice';
 import communityReducer from './slices/communitySlice';
+import registerReducer from './slices/TagSlice'
 import tagReducer from './slices/TagSlice'
+
 // import usersReducer from './usersSlice';
 
 const store = configureStore({
@@ -14,7 +16,9 @@ const store = configureStore({
         user: userReducer,
         post: postReducer,
         community: communityReducer,
-        tag: tagReducer
+        tag: tagReducer,
+        register: registerReducer
+
         // posts: postsReducer,
         // users: usersReducer
     }
